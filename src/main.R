@@ -10,7 +10,7 @@
 
 # ----- 0. Dependências ----------------------------------------
 pacotes <- c("readxl", "openxlsx", "dplyr", "ggplot2", "tidytext",
-             "scales", "stringi", "patchwork")
+             "scales", "stringi", "patchwork", "ggrepel")
 novos <- pacotes[!sapply(pacotes, requireNamespace, quietly = TRUE)]
 if (length(novos)) install.packages(novos)
 invisible(lapply(pacotes, library, character.only = TRUE))
@@ -25,36 +25,46 @@ source(file.path(DIR_SRC, "analise.R"))
 source(file.path(DIR_SRC, "graficos.R"))
 
 # ----- 2. Leitura das bases -----------------------------------
-base     <- read_excel(file.path(DIR_DOCS, "base_tratada_2025.xlsx"))
-salarios <- read_excel(file.path(DIR_DOCS, "municipios_sp_salarios.xlsx"))
+base  <- read_excel(file.path(DIR_DOCS, "base_tratada_2025.xlsx"))
+renda <- read_excel(file.path(DIR_DOCS, "Renda_por_Municipio_-_SP.xlsx"))
 
 cat(sprintf("Base criminal: %s linhas | %s municípios únicos\n",
             format(nrow(base), big.mark = "."),
             base$NOME_MUNICIPIO |> unique() |> length()))
+cat(sprintf("Base renda: %s municípios\n", nrow(renda)))
 
 # ----- 3. Normalização ----------------------------------------
-base$NOME_MUNICIPIO    <- aplicar_abreviacoes(normalizar_municipio(base$NOME_MUNICIPIO))
-colnames(salarios)[1]  <- "Município"
-salarios$Município_key <- normalizar_municipio(salarios$Município)
+base$NOME_MUNICIPIO <- aplicar_abreviacoes(normalizar_municipio(base$NOME_MUNICIPIO))
+renda$MUNICIPIO_key <- normalizar_municipio(renda$MUNICIPIO)
 
 # ----- 4. Análises --------------------------------------------
 top3              <- top_rubricas(base, n = 3)
 ocorr_mun         <- ocorrencias_por_municipio(base)
-ocorr_com_renda   <- join_com_salarios(ocorr_mun, salarios)
+ocorr_com_renda   <- join_com_renda(ocorr_mun, renda)
 top5_rubrica      <- top5_por_rubrica(base, top3)
 ocorr_por_rubrica <- ocorrencias_por_municipio_rubrica(base, top3)
+stats_renda       <- estatisticas_renda(renda)
+stats_ocorr       <- estatisticas_ocorrencias(ocorr_mun)
 
 cat("\nTop 3 rubricas:\n")
 print(top3)
 
+cat("\nEstatísticas — Renda por Município (R$):\n")
+print(stats_renda)
+
+cat("\nEstatísticas — Ocorrências por Município:\n")
+print(stats_ocorr)
+
 # ----- 5. Exportação de tabelas -------------------------------
 write.xlsx(
   list(
-    "Ocorr_x_Renda"   = as.data.frame(ocorr_com_renda),
-    "Top5_por_Rubrica" = as.data.frame(top5_rubrica),
-    "Contagem_Rubrica" = as.data.frame(
+    "Ocorr_x_Renda"      = as.data.frame(ocorr_com_renda),
+    "Top5_por_Rubrica"   = as.data.frame(top5_rubrica),
+    "Contagem_Rubrica"   = as.data.frame(
       base |> count(RUBRICA, name = "QUANTIDADE") |> arrange(desc(QUANTIDADE))
-    )
+    ),
+    "Estatisticas_Renda" = stats_renda,
+    "Estatisticas_Ocorr" = stats_ocorr
   ),
   file.path(OUT_DIR, "analise_2025.xlsx"),
   rowNames = FALSE
@@ -82,5 +92,11 @@ p_top5 <- grafico_top5_facetado(top5_rubrica)
 ggsave(file.path(OUT_DIR, "grafico_top5_facetado.png"),
        plot = p_top5, width = 10, height = 12, dpi = 150)
 cat("✓ grafico_top5_facetado.png exportado\n")
+
+# 6.4 Distribuição da renda entre municípios
+p_dist <- grafico_distribuicao_renda(renda)
+ggsave(file.path(OUT_DIR, "grafico_distribuicao_renda.png"),
+       plot = p_dist, width = 10, height = 6, dpi = 150)
+cat("✓ grafico_distribuicao_renda.png exportado\n")
 
 cat("\n=== Pipeline concluído ===\n")

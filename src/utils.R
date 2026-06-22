@@ -2,10 +2,11 @@
 
 library(stringi)
 
-# Normaliza nome de município: maiúsculo, sem acento, sem pontuação, espaços simples
+# Normaliza nome de município: maiúsculo, sem acento, sem sufixo (SP), sem pontuação
 normalizar_municipio <- function(x) {
   x <- toupper(trimws(x))
   x <- stri_trans_general(x, "Latin-ASCII")
+  x <- gsub("\\s*\\(SP\\)", "", x)   # remove sufixo (SP) presente na nova base
   x <- gsub("[.\\-]", " ", x)
   x <- gsub("\\s+", " ", x)
   trimws(x)
