@@ -36,6 +36,26 @@ join_com_renda <- function(ocorrencias_mun, renda) {
     arrange(desc(TOTAL_OCORRENCIAS))
 }
 
+# Join com população (IBGE, Tabela 4709) e calcula taxa de ocorrências per capita
+join_com_populacao <- function(ocorrencias_mun, populacao) {
+  ocorrencias_mun %>%
+    left_join(populacao, by = c("NOME_MUNICIPIO" = "MUNICIPIO_key")) %>%
+    mutate(
+      ocorrencias_por_1000_hab = round(TOTAL_OCORRENCIAS / POPULACAO * 1000, 3)
+    ) %>%
+    arrange(desc(ocorrencias_por_1000_hab))
+}
+
+# Ocorrências por município e rubrica com taxa per capita (por 1.000 hab.)
+ocorrencias_por_municipio_rubrica_per_capita <- function(ocorr_mun_rubrica, populacao) {
+  ocorr_mun_rubrica %>%
+    left_join(populacao, by = c("NOME_MUNICIPIO" = "MUNICIPIO_key")) %>%
+    mutate(
+      ocorrencias_por_1000_hab = round(QUANTIDADE / POPULACAO * 1000, 3)
+    ) %>%
+    arrange(RUBRICA, desc(ocorrencias_por_1000_hab))
+}
+
 # Top 5 municípios por cada rubrica
 top5_por_rubrica <- function(base, rubricas) {
   base %>%

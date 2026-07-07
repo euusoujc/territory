@@ -105,6 +105,73 @@ grafico_ocorrencias_vs_renda <- function(df_com_renda, top_n = 30) {
     )
 }
 
+# Top N municípios por ocorrências per capita (por 1.000 hab.)
+# pop_min filtra municípios muito pequenos, cuja taxa dispara com poucos casos
+grafico_top10_per_capita <- function(df_com_pop, top_n = 10, pop_min = 10000) {
+  df <- df_com_pop %>%
+    filter(!is.na(POPULACAO), POPULACAO >= pop_min) %>%
+    slice_max(order_by = ocorrencias_por_1000_hab, n = top_n) %>%
+    mutate(NOME_MUNICIPIO = reorder(NOME_MUNICIPIO, ocorrencias_por_1000_hab))
+
+  ggplot(df, aes(x = NOME_MUNICIPIO, y = ocorrencias_por_1000_hab)) +
+    geom_col(fill = "#1F4E79", width = 0.7) +
+    geom_text(aes(label = scales::comma(ocorrencias_por_1000_hab, decimal.mark = ",", big.mark = ".")),
+              hjust = -0.1, size = 3.2, color = "gray20") +
+    coord_flip() +
+    scale_y_continuous(
+      labels = scales::comma_format(decimal.mark = ",", big.mark = "."),
+      expand = expansion(mult = c(0, 0.15))
+    ) +
+    labs(
+      title    = paste("Top", top_n, "Municípios — Ocorrências per Capita"),
+      subtitle = paste0("Ocorrências por 1.000 habitantes | Municípios com população ≥ ",
+                         scales::comma(pop_min, big.mark = ".", decimal.mark = ","), " | SP 2025"),
+      x = NULL, y = "Ocorrências por 1.000 hab."
+    ) +
+    theme_minimal(base_size = 12) +
+    theme(
+      plot.title         = element_text(face = "bold", size = 13, color = "#1F4E79"),
+      plot.subtitle      = element_text(size = 9, color = "gray50"),
+      panel.grid.major.y = element_blank(),
+      panel.grid.minor   = element_blank(),
+      axis.text.y        = element_text(size = 10)
+    )
+}
+
+# Top N municípios por taxa per capita de uma rubrica específica
+grafico_top10_rubrica_per_capita <- function(dados_rubrica_pop, rubrica, top_n = 10, pop_min = 10000) {
+  df <- dados_rubrica_pop %>%
+    filter(RUBRICA == rubrica, !is.na(POPULACAO), POPULACAO >= pop_min) %>%
+    slice_max(order_by = ocorrencias_por_1000_hab, n = top_n) %>%
+    mutate(NOME_MUNICIPIO = reorder(NOME_MUNICIPIO, ocorrencias_por_1000_hab))
+
+  cor <- ifelse(rubrica %in% names(cores_rubricas), cores_rubricas[[rubrica]], "#2E75B6")
+
+  ggplot(df, aes(x = NOME_MUNICIPIO, y = ocorrencias_por_1000_hab)) +
+    geom_col(fill = cor, width = 0.7) +
+    geom_text(aes(label = scales::comma(ocorrencias_por_1000_hab, decimal.mark = ",", big.mark = ".")),
+              hjust = -0.1, size = 3.2, color = "gray20") +
+    coord_flip() +
+    scale_y_continuous(
+      labels = scales::comma_format(decimal.mark = ",", big.mark = "."),
+      expand = expansion(mult = c(0, 0.15))
+    ) +
+    labs(
+      title    = paste("Top", top_n, "Municípios per Capita —", rubrica),
+      subtitle = paste0("Ocorrências por 1.000 habitantes | Municípios com população ≥ ",
+                         scales::comma(pop_min, big.mark = ".", decimal.mark = ","), " | SP 2025"),
+      x = NULL, y = "Ocorrências por 1.000 hab."
+    ) +
+    theme_minimal(base_size = 12) +
+    theme(
+      plot.title         = element_text(face = "bold", size = 13, color = "#1F4E79"),
+      plot.subtitle      = element_text(size = 9, color = "gray50"),
+      panel.grid.major.y = element_blank(),
+      panel.grid.minor   = element_blank(),
+      axis.text.y        = element_text(size = 10)
+    )
+}
+
 # Painel facetado: top 5 por cada uma das top 3 rubricas
 grafico_top5_facetado <- function(top5_df) {
   top5_df %>%
