@@ -16,8 +16,8 @@ if (length(novos)) install.packages(novos)
 invisible(lapply(pacotes, library, character.only = TRUE))
 
 # ----- 1. Caminhos --------------------------------------------
-DIR_SRC  <- "C:/Users/julcs/Documents/territory/src"
-DIR_DOCS <- "C:/Users/julcs/Documents/territory/docs"
+DIR_SRC  <- "C:/Users/User/Documents/territory/src"
+DIR_DOCS <- "C:/Users/User/Documents/territory/docs"
 DIR_ROOT <- dirname(DIR_DOCS)
 OUT_DIR  <- DIR_DOCS
 
@@ -129,3 +129,4 @@ for (rub in top3) {
 }
 
 cat("\n=== Pipeline concluído ===\n")
+
