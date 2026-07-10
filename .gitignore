@@ -1,1 +1,5 @@
 docs/SPDadosCriminais_2025.xlsx
+data/malha_municipios_sp.gpkg
+src/.RData
+src/.Rhistory
+docs/.~lock.*

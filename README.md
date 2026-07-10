@@ -92,6 +92,23 @@ source("src/main.R")
 
 ---
 
+## 🗺️ Pipeline de Análise Espacial
+
+Análise de correlação e autocorrelação espacial (Moran's I global e LISA) das taxas de roubo, furto e lesão corporal por 1.000 habitantes, com mapas coropléticos. Tudo scriptado — sem passo manual no QGIS:
+
+```bash
+Rscript run_espacial.R
+```
+
+O pipeline (em `src/espacial/`, pacotes `sf`, `spdep`, `geobr`, `corrplot`):
+
+1. Constrói e valida `data/tabelao.csv` (uma linha por município, chave `cod_ibge`) a partir das bases em `docs/`;
+2. Gera `data/litoranea_turistica.csv` — classificação **editável** dos municípios litorâneos/turísticos (revise e reexecute);
+3. Baixa a malha de municípios de SP (IBGE, via `geobr`) com cache em `data/`;
+4. Exporta para `outputs/`: top 5 por crime, matrizes de correlação (figura + CSV), dispersões, Moran's I global, mapas de clusters LISA, mapas coropléticos e o relatório `outputs/relatorio.md`.
+
+---
+
 ## 🔍 Hipótese
 
 > **Acontecem mais crimes nas cidades mais pobres?**

@@ -1,0 +1,4 @@
+crime,variavel,moran_I,p_valor,n_perm
+Roubo (art. 157),taxa_roubo_1000,0.832,0.001,999
+Furto (art. 155),taxa_furto_1000,0.4218,0.001,999
+Lesão corporal (art. 129),taxa_lesao_1000,0.1812,0.001,999
