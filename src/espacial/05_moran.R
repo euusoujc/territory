@@ -63,9 +63,11 @@ for (cr in names(CRIMES)) {
               litoranea_turistica)
 
   p_lisa <- ggplot(malha_dados) +
-    geom_sf(aes(fill = .data[[col_cluster]]), colour = "white", linewidth = 0.08) +
-    scale_fill_manual(values = PAL_LISA, drop = FALSE,
-                      guide = guide_legend(override.aes = list(fill = unname(PAL_LISA)))) +
+    # show.legend = TRUE força a amostra de cor na legenda mesmo para
+    # classes sem ocorrência no crime (ggplot2 >= 3.5 omite por padrão)
+    geom_sf(aes(fill = .data[[col_cluster]]), colour = "white",
+            linewidth = 0.08, show.legend = TRUE) +
+    scale_fill_manual(values = PAL_LISA, drop = FALSE) +
     labs(title = sprintf("Clusters LISA — %s", CRIMES[[cr]]),
          subtitle = sprintf("Moran local da taxa por 1.000 hab. (p ≤ %.2f, vizinhança queen)", SIG_LISA),
          fill = "Cluster", caption = FONTE_DADOS) +

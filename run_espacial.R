@@ -28,7 +28,8 @@ etapas <- c(
   "04_malha.R",
   "05_moran.R",
   "06_mapas.R",
-  "07_relatorio.R"
+  "07_relatorio.R",
+  "08_xlsx.R"
 )
 
 t0 <- Sys.time()

@@ -1,4 +1,4 @@
-Validação do tabelão — 2026-07-10 01:32
+Validação do tabelão — 2026-07-10 01:49
 Arquivo: /Users/lucasamorim/Documents/GitHub/territory/data/tabelao.csv | 645 linhas x 10 colunas
 
 ERROS: nenhum
