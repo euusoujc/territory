@@ -31,10 +31,13 @@ cat("✓ moran_global.csv\n")
 print(as.data.frame(moran_global))
 
 # --- Moran local (LISA) + mapas de clusters --------------------
+# Inferência por permutação condicional (999 sim.), como no GeoDa —
+# a aproximação analítica de localmoran() subestima clusters Baixo-Baixo
+# em variáveis assimétricas cheias de zeros (caso das taxas de roubo).
 classificar_lisa <- function(x, lw, sig = SIG_LISA) {
   x[is.na(x)] <- mean(x, na.rm = TRUE)
-  lisa <- spdep::localmoran(x, lw, zero.policy = TRUE)
-  p    <- lisa[, "Pr(z != E(Ii))"]
+  lisa <- spdep::localmoran_perm(x, lw, nsim = N_PERM, zero.policy = TRUE)
+  p    <- lisa[, grep("Sim", colnames(lisa), value = TRUE)[1]]
   z    <- as.numeric(scale(x))
   lag  <- spdep::lag.listw(lw, z, zero.policy = TRUE)
   cluster <- dplyr::case_when(

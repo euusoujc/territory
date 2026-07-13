@@ -46,6 +46,8 @@ não rodar sem ajustar).
 - Ilhabela é ilha: fica sem vizinhos na matriz queen (zero.policy = TRUE).
 - Resultados de referência (queen ordem 1, 999 perm.): Moran's I roubo 0,832,
   furto 0,422, lesão 0,181 (todos p = 0,001).
+- LISA usa spdep::localmoran_perm (permutação condicional, como o GeoDa) —
+  a versão analítica localmoran() subestima clusters Baixo-Baixo nas taxas.
 - ggplot2 >= 3.5: usar `show.legend = TRUE` no geom_sf para legendas com
   classes vazias (já aplicado em 05_moran.R).
 - Commits em português, prefixos feat:/fix:/refact: (padrão do histórico).

@@ -1,6 +1,6 @@
 # Análise espacial da criminalidade — municípios de SP (2025)
 
-_Gerado automaticamente por `run_espacial.R` em 12/07/2026._
+_Gerado automaticamente por `run_espacial.R` em 13/07/2026._
 
 Crimes analisados: roubo (art. 157), furto (art. 155) e lesão corporal (art. 129),
 em taxas por 1.000 habitantes (população: IBGE Tabela 4709, Censo 2022).
@@ -87,13 +87,13 @@ Spearman (robusta a outliers como São Paulo):
 
 | crime | Alto-Alto | Baixo-Baixo | Alto-Baixo | Baixo-Alto | Não significativo |
 | --- | --- | --- | --- | --- | --- |
-| Furto (art. 155) | 45 | 22 | 6 | 10 | 562 |
-| Lesão corporal (art. 129) | 27 | 14 | 3 |  9 | 592 |
-| Roubo (art. 157) | 53 |  0 | 0 |  3 | 589 |
+| Furto (art. 155) | 36 | 45 | 7 | 6 | 551 |
+| Lesão corporal (art. 129) | 22 | 28 | 5 | 6 | 584 |
+| Roubo (art. 157) | 45 | 93 | 1 | 2 | 504 |
 
-- **Furto (art. 155)**: 45 municípios em cluster Alto-Alto, dos quais 13 (29%) litorâneos/turísticos.
-- **Lesão corporal (art. 129)**: 27 municípios em cluster Alto-Alto, dos quais 3 (11%) litorâneos/turísticos.
-- **Roubo (art. 157)**: 53 municípios em cluster Alto-Alto, dos quais 9 (17%) litorâneos/turísticos.
+- **Furto (art. 155)**: 36 municípios em cluster Alto-Alto, dos quais 13 (36%) litorâneos/turísticos.
+- **Lesão corporal (art. 129)**: 22 municípios em cluster Alto-Alto, dos quais 2 (9%) litorâneos/turísticos.
+- **Roubo (art. 157)**: 45 municípios em cluster Alto-Alto, dos quais 8 (18%) litorâneos/turísticos.
 
 ![LISA roubo](mapa_lisa_roubo.png)
 ![LISA furto](mapa_lisa_furto.png)

@@ -127,13 +127,50 @@ No botão direito dá para aumentar as permutações (99999) e ajustar o nível 
 significância — vale comentar no trabalho que o LISA é sensível a isso.
 
 **Resultados esperados (para comparar com `outputs/mapa_lisa_*.png` e
-`outputs/lisa_clusters.csv`):**
+`outputs/lisa_clusters.csv` — pipeline R com permutação condicional, 999 sim.):**
 
 | Variável | High-High esperado | Leitura |
 |---|---|---|
-| `tx_roubo` | 53 municípios: um único grande cluster RMSP + Baixada Santista | crime metropolitano |
-| `tx_furto` | 45 municípios acompanhando o litoral (29% litorâneos/turísticos) | evidência da hipótese turística |
-| `tx_lesao` | 27 municípios em bolsões dispersos no interior | pouca estrutura espacial |
+| `tx_roubo` | ~45 municípios: um único grande cluster RMSP + Baixada Santista (+ grande campo Low-Low no oeste) | crime metropolitano |
+| `tx_furto` | ~36 municípios acompanhando o litoral (36% litorâneos/turísticos) | evidência da hipótese turística |
+| `tx_lesao` | ~22 municípios em bolsões dispersos no interior | pouca estrutura espacial |
+
+---
+
+## Resultados obtidos no GeoDa (experimento do grupo, jul/2026)
+
+Executado com a matriz queen ordem 1 (`cod_ibge`), 999 permutações. Tudo
+conferiu com o gabarito do pipeline em R:
+
+**Moran's I global:**
+
+| Variável | I (GeoDa) | I (R) | z-value | pseudo p |
+|---|---|---|---|---|
+| `tx_roubo` | 0,832 | 0,832 | 35,6 | 0,001 |
+| `tx_furto` | 0,426 | 0,422 | 17,5 | 0,001 |
+| `tx_lesao` | 0,183 | 0,181 | 7,5  | 0,001 |
+
+(As diferenças na 3ª casa vêm do tratamento da Ilhabela: o GeoDa remove a
+observação isolada; o R a mantém na base.)
+
+**Clusters LISA (p ≤ 0,05):**
+
+| Variável | High-High (GeoDa / R) | Low-Low (GeoDa / R) | Padrão |
+|---|---|---|---|
+| `tx_roubo` | 50 / 45 | 148 / 93 | AA: RMSP + Baixada; LL: oeste/noroeste |
+| `tx_furto` | 49 / 36 | 67 / 45 | AA: litoral inteiro; LL: oeste e centro-sul |
+| `tx_lesao` | 36 / 22 | 53 / 28 | bolsões pequenos e fragmentados |
+
+**Nota metodológica (vale citar no trabalho):** os clusters Alto-Alto — que
+sustentam as hipóteses — são robustos: aparecem nos mesmos lugares no GeoDa e
+no R. Já a *extensão* dos clusters (especialmente Baixo-Baixo) depende do
+procedimento de inferência local: a aproximação analítica clássica de
+`spdep::localmoran()` quase não detecta cold spots em variáveis assimétricas
+cheias de zeros, enquanto a permutação condicional (usada pelo GeoDa e por
+`spdep::localmoran_perm()`, que o pipeline adota) os revela. Mesmo entre duas
+implementações de permutação os totais variam um pouco (sorteios e critérios
+de p-valor diferentes). Conclusão: leia o LISA pela *geografia* dos clusters,
+não pela contagem exata de municípios.
 
 ## Dica final para o texto
 
