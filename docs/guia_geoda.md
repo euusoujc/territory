@@ -139,8 +139,15 @@ significância — vale comentar no trabalho que o LISA é sensível a isso.
 
 ## Resultados obtidos no GeoDa (experimento do grupo, jul/2026)
 
-Executado com a matriz queen ordem 1 (`cod_ibge`), 999 permutações. Tudo
-conferiu com o gabarito do pipeline em R:
+Executado com a matriz queen ordem 1 (`cod_ibge`), 999 permutações. Os prints
+do experimento estão em **`docs/geoda_prints/`** com nomes descritivos:
+`mapa_{quantil,desvpad,boxmap}_tx_*.jpeg` (Passo 1 — inclui os
+`mapa_desvpad_contagem_*.jpeg` usados no contraste contagem × taxa),
+`matriz_pesos_queen1.jpeg` (Passo 2), `moran_tx_*.jpeg` e
+`randomization_tx_*.jpeg` (Passo 3) e `lisa_tx_*.jpeg` (Passo 4).
+Obs.: vieram comprimidos pelo WhatsApp — para o documento final, reexportar
+do GeoDa em resolução cheia se necessário. Tudo conferiu com o gabarito do
+pipeline em R:
 
 **Moran's I global:**
 
