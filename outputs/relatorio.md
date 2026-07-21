@@ -1,6 +1,6 @@
 # Análise espacial da criminalidade — municípios de SP (2025)
 
-_Gerado automaticamente por `run_espacial.R` em 13/07/2026._
+_Gerado automaticamente por `run_espacial.R` em 20/07/2026._
 
 Crimes analisados: roubo (art. 157), furto (art. 155) e lesão corporal (art. 129),
 em taxas por 1.000 habitantes (população: IBGE Tabela 4709, Censo 2022).

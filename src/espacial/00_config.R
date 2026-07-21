@@ -1,7 +1,8 @@
 # 00_config.R — dependências, caminhos e parâmetros do pipeline espacial
 
 pacotes <- c("readxl", "openxlsx", "dplyr", "tidyr", "readr", "ggplot2",
-             "corrplot", "stringi", "sf", "spdep", "geobr", "classInt")
+             "corrplot", "stringi", "sf", "spdep", "geobr", "classInt",
+             "broom", "car", "stargazer", "report", "patchwork", "ggrepel")
 novos <- pacotes[!sapply(pacotes, requireNamespace, quietly = TRUE)]
 if (length(novos)) install.packages(novos, repos = "https://cloud.r-project.org")
 suppressPackageStartupMessages(
