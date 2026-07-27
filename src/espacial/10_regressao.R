@@ -168,7 +168,9 @@ reg_resultados <- list(
                   r2aj = summary(m_multipla)$adj.r.squared,
                   tidy = broom::tidy(m_multipla)),
   log      = list(coef = coef(m_log), r2 = summary(m_log)$r.squared),
-  sem_litoral = coef(m_sem_litoral),
+  sem_influentes = list(coef = coef(m_sem_infl),
+                        r2 = summary(m_sem_infl)$r.squared,
+                        n_influentes = sum(reg_df$influente)),
   diag = list(ncv = teste_ncv$p, shapiro = teste_shapiro$p.value, vif = vif_vals)
 )
 
