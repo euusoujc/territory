@@ -44,7 +44,9 @@ reg_g$gwr_localR2 <- gwr_fit$SDF$localR2
 moran_err <- spdep::moran.mc(reg_g$res_err, lw_reg, nsim = 499, zero.policy = TRUE)
 
 # --- 5. Tabela comparativa ------------------------------------
-nk <- function(m) summary(m, Nagelkerke = TRUE)$NK
+# R² dos modelos espaciais no padrão do GeoDa: correlação ao quadrado
+# entre observado e predito (não o pseudo-R² de Nagelkerke).
+r2_geoda <- function(m) cor(reg_g$tx_furto, fitted(m))^2
 gwr_R2 <- 1 - gwr_fit$results$rss / sum((reg_g$tx_furto - mean(reg_g$tx_furto))^2)
 reg_espacial_comp <- tibble::tibble(
   modelo = c("OLS clássico", "Spatial Lag (SAR)", "Spatial Error (CAR)", "GWR (local)"),
@@ -52,7 +54,7 @@ reg_espacial_comp <- tibble::tibble(
                          sprintf("rho = %.3f", m_lag$rho),
                          sprintf("lambda = %.3f", m_err$lambda),
                          sprintf("bw adapt. = %.3f", gwr_bw)),
-  r2 = c(summary(ols)$r.squared, nk(m_lag), nk(m_err), gwr_R2),
+  r2 = c(summary(ols)$r.squared, r2_geoda(m_lag), r2_geoda(m_err), gwr_R2),
   AIC = c(AIC(ols), AIC(m_lag), AIC(m_err), gwr_fit$results$AICh),
   moran_residuos = c(moran_ols$estimate[1], NA, moran_err$statistic, NA)
 )

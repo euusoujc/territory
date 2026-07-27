@@ -94,10 +94,10 @@ não** → o modelo indicado é o **Spatial Error**.
 
 ### 3. Modelos espaciais globais
 
-| Modelo | R² (pseudo) | Parâmetro | AIC |
+| Modelo | R² | Parâmetro | AIC |
 |---|---|---|---|
-| Spatial Lag (SAR) | 0,310 | rho = 0,519 | 3241,5 |
-| Spatial Error (CAR) | 0,332 | lambda = 0,588 | 3220,6 |
+| Spatial Lag (SAR) | 0,356 | rho = 0,519 | 3241,5 |
+| Spatial Error (CAR) | 0,392 | lambda = 0,588 | 3220,6 |
 
 Os dois melhoram muito o ajuste em relação ao OLS (R² sobe de 0,13). O **Spatial
 Error tem o menor AIC**, confirmando o que os testes LM indicaram: a dependência
@@ -131,9 +131,9 @@ estacionário). Referências (bandwidth adaptativo ≈ 10 vizinhos):
 | Modelo | Tipo | R² | AIC | Moran dos resíduos |
 |---|---|---|---|---|
 | OLS clássico | não espacial | 0,129 | 3389,6 | 0,38 |
-| Spatial Lag | espacial global | 0,310 | 3241,5 | ~0 |
-| Spatial Error | espacial global | 0,332 | 3220,6 | −0,03 |
-| GWR | espacial local | 0,458 | 3137,0 | — |
+| Spatial Lag | espacial global | 0,356 | 3241,5 | ~0 |
+| Spatial Error | espacial global | 0,392 | 3220,6 | −0,03 |
+| GWR | espacial local | 0,458 | 3137,0 | n.a. |
 
 O **AIC diminui e o R² aumenta** a cada passo: o **GWR tem o melhor ajuste**,
 seguido do Spatial Error, do Spatial Lag e, por último, do OLS. Cada modelo
