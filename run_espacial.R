@@ -33,7 +33,8 @@ etapas <- c(
   "09_geoda.R",
   "10_regressao.R",
   "11_regressao_espacial.R",
-  "12_gwr_litoral.R"
+  "12_gwr_litoral.R",
+  "13_gwr_geoda.R"
 )
 
 t0 <- Sys.time()
