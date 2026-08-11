@@ -1,173 +1,114 @@
-# Análise de Dados para Planejamento Territorial
+# Furto, Renda e Território — Análise Espacial da Criminalidade em SP
 
-Com o apoio da professora **Flávia da Fonseca Feitosa**, estruturamos a pesquisa de relacionar casos criminais dos municípios de São Paulo com a renda média (dados do Censo Demográfico 2022 do IBGE). A partir disso queremos responder a seguinte hipótese:
+Projeto acadêmico da disciplina **Análise de Dados para Planejamento Territorial**
+(UFABC), sob orientação da Prof.ª **Flávia da Fonseca Feitosa**. Cruza ocorrências
+criminais da SSP-SP (2025) com a renda média do Censo IBGE 2022 nos 645 municípios
+de São Paulo para investigar:
 
 > **Acontecem mais crimes nas cidades mais pobres?**
 
+A hipótese original (H1) **não se confirma**: a correlação entre renda e taxa de
+furto é positiva, não negativa. A explicação mais consistente com a evidência
+acumulada é a hipótese exploratória (H2): municípios **litorâneos e turísticos**
+concentram taxas mais altas por 1.000 habitantes porque a população flutuante de
+verão infla o numerador (ocorrências) sobre um denominador que mede só residentes.
+
+O artigo completo, com todo o desenvolvimento metodológico (correlação →
+autocorrelação espacial → OLS → regressão espacial global → GWR), está em
+[`paper/relatorio_final_gwr.tex`](paper/relatorio_final_gwr.tex).
+
 ---
 
-## 🗂️ Estrutura do Repositório
+## 🗂️ Estrutura do repositório
 
 ```
 territory/
-├── docs/                              # Bases de dados e outputs
-│   ├── base_tratada_2025.xlsx         # Base criminal consolidada (JAN–DEZ 2025)
-│   ├── Renda_por_Municipio_-_SP.xlsx  # Renda média per capita — Censo 2022
-│   ├── analise_2025.xlsx              # Resultado das análises
-│   └── *.png                          # Gráficos gerados
-└── src/                               # Código-fonte
-    ├── main.R                         # Script principal
-    ├── analise.R                      # Funções de agregação
-    ├── graficos.R                     # Funções de visualização
-    └── utils.R                        # Funções auxiliares
+├── run_espacial.R              # ponto de entrada: roda o pipeline completo
+├── src/
+│   ├── utils.R                 # normalização de nomes de município
+│   └── espacial/                # pipeline espacial, em ordem (00 a 13)
+│       ├── 00_config.R          # pacotes, caminhos, paleta, constantes
+│       ├── 01_tabelao.R         # junta SSP-SP + IBGE renda/população → data/tabelao.csv
+│       ├── 02_litoranea.R       # gera data/litoranea_turistica.csv (editável)
+│       ├── 03_correlacao.R      # Pearson/Spearman, matriz e dispersões
+│       ├── 04_malha.R           # baixa a malha de municípios (IBGE via geobr)
+│       ├── 05_moran.R           # Moran's I global + LISA (localmoran_perm)
+│       ├── 06_mapas.R           # mapas coropléticos das taxas
+│       ├── 07_relatorio.R       # outputs/relatorio.md
+│       ├── 08_xlsx.R            # outputs/analise_espacial.xlsx
+│       ├── 09_geoda.R           # pacote data/geoda_sp.gpkg (+ shp) para o GeoDa
+│       ├── 10_regressao.R       # OLS simples e múltiplo (renda + litoral)
+│       ├── 11_regressao_espacial.R  # testes LM, spatial lag/error, GWR (~renda)
+│       ├── 12_gwr_litoral.R     # GWR (~renda + litoral), contrafactual, resíduos
+│       └── 13_gwr_geoda.R       # GWR enxuto (~renda) empacotado p/ o GeoDa
+├── data/                        # tabelão, malha, pacotes prontos para o GeoDa
+├── docs/                        # bases originais (.xlsx), guias do GeoDa, prints
+├── outputs/                     # mapas, tabelas e relatório gerados pelo pipeline
+├── paper/                       # artigo final (LaTeX, modelo IEEE)
+└── slides/                      # apresentação da equipe (pptx / html / pdf)
 ```
 
 ---
 
-## 🛠️ Tecnologias Utilizadas
-
-| Tecnologia | Descrição |
-|---|---|
-| **R 4.6** | Linguagem principal de análise |
-| **RStudio** | IDE para desenvolvimento |
-| `readxl` | Leitura de arquivos Excel |
-| `openxlsx` | Escrita de arquivos Excel |
-| `dplyr` | Manipulação de dados |
-| `ggplot2` | Visualização de dados |
-| `ggrepel` | Labels sem sobreposição nos gráficos |
-| `stringi` | Normalização de texto |
-| `tidytext` | Ordenação em gráficos facetados |
-| `scales` | Formatação de eixos nos gráficos |
-| **Git + GitHub** | Versionamento de código |
-
----
-
-## 📊 Fontes de Dados
-
-| Base | Fonte | Descrição |
-|---|---|---|
-| Dados Criminais SP 2025 | [SSP-SP](https://www.ssp.sp.gov.br/estatistica/dados-mensais) | Ocorrências criminais por município — JAN a DEZ 2025 |
-| Renda Média por Município | [IBGE — Censo 2022](https://cidades.ibge.gov.br/) | Renda média per capita de pessoas com 14 anos ou mais — 645 municípios de SP |
-
----
-
-## ⚙️ Fluxo de Execução
-
-```
-SPDadosCriminais_2025.xlsx
-        │
-        ▼
-  Leitura das sheets
-  JAN-JUN_2025 + JUL-DEZ_2025
-        │
-        ▼
-  Concatenação e seleção
-  de colunas relevantes
-  (base_tratada_2025.xlsx)
-        │
-        ▼
-  Normalização dos nomes       Renda_por_Municipio_-_SP.xlsx
-  de municípios          ───────────────┘
-        │
-        ▼
-  Join: ocorrências × renda média
-        │
-        ├──▶ analise_2025.xlsx
-        │     ├── Ocorr_x_Renda
-        │     ├── Top5_por_Rubrica
-        │     ├── Contagem_Rubrica
-        │     ├── Estatisticas_Renda
-        │     └── Estatisticas_Ocorr
-        │
-        └──▶ Gráficos PNG
-```
-
-Para reproduzir a análise completa, basta rodar:
-
-```r
-source("src/main.R")
-```
-
-> ⚠️ O arquivo `SPDadosCriminais_2025.xlsx` não está incluído no repositório por exceder o limite de tamanho do GitHub (187 MB). Faça o download diretamente no site da SSP-SP e salve em `docs/`.
-
----
-
-## 🗺️ Pipeline de Análise Espacial
-
-Análise de correlação e autocorrelação espacial (Moran's I global e LISA) das taxas de roubo, furto e lesão corporal por 1.000 habitantes, com mapas coropléticos. Tudo scriptado — sem passo manual no QGIS:
+## ⚙️ Como rodar
 
 ```bash
 Rscript run_espacial.R
 ```
 
-O pipeline (em `src/espacial/`, pacotes `sf`, `spdep`, `geobr`, `corrplot`):
+Pacotes usados: `sf`, `spdep`, `spatialreg`, `spgwr`, `geobr`, `dplyr`,
+`ggplot2`, `corrplot`, `openxlsx`, entre outros (instalados automaticamente
+pelo `00_config.R` se ausentes).
 
-1. Constrói e valida `data/tabelao.csv` (uma linha por município, chave `cod_ibge`) a partir das bases em `docs/`;
-2. Gera `data/litoranea_turistica.csv` — classificação **editável** dos municípios litorâneos/turísticos (revise e reexecute);
-3. Baixa a malha de municípios de SP (IBGE, via `geobr`) com cache em `data/`;
-4. Exporta para `outputs/`: top 5 por crime, matrizes de correlação (figura + CSV), dispersões, Moran's I global, mapas de clusters LISA, mapas coropléticos e o relatório `outputs/relatorio.md`.
+O pipeline:
 
----
-
-## 🔍 Hipótese
-
-> **Acontecem mais crimes nas cidades mais pobres?**
-
-Para investigar essa questão, cruzamos o total de ocorrências criminais registradas em cada município de São Paulo com a renda média per capita (Censo Demográfico 2022, IBGE). A análise considera os **3 tipos de crime mais frequentes** no estado:
-
-1. Furto (art. 155)
-2. Roubo (art. 157)
-3. Lesão Corporal (art. 129)
-
----
-
-## 📈 Visualizações
-
-### Ocorrências vs Renda Média
-![Ocorrências vs Renda](docs/grafico_ocorrencias_vs_renda.png)
-
-### Distribuição da Renda por Município
-![Distribuição de Renda](docs/grafico_distribuicao_renda.png)
-
-### Top 10 Municípios — Furto
-![Top 10 Furto](docs/grafico_top10_furto__art__155_.png)
-
-### Top 10 Municípios — Roubo
-![Top 10 Roubo](docs/grafico_top10_roubo__art__157_.png)
-
-### Top 10 Municípios — Lesão Corporal
-![Top 10 Lesão Corporal](docs/grafico_top10_les_o_corporal__art__129_.png)
-
-### Top 5 por Tipo de Ocorrência
-![Top 5 Facetado](docs/grafico_top5_facetado.png)
+1. Constrói e valida `data/tabelao.csv` (uma linha por município, chave
+   `cod_ibge`) a partir das bases em `docs/`;
+2. Gera `data/litoranea_turistica.csv` — classificação **editável** dos
+   municípios litorâneos/turísticos (revise e reexecute se necessário);
+3. Calcula correlações, autocorrelação espacial (Moran's I global e LISA) e
+   gera os mapas coropléticos e de clusters;
+4. Ajusta a progressão de modelos — OLS simples e múltiplo, spatial lag e
+   spatial error, GWR (~renda e ~renda + litoral) com cenário contrafactual
+   isolando o efeito litorâneo;
+5. Exporta tudo para `outputs/` (mapas, csv, `analise_espacial.xlsx`,
+   `relatorio.md`) e empacota os resultados para o GeoDa em `data/`.
 
 ---
 
-## 📚 Referências de Termos Técnicos
+## 📊 Fontes de dados
 
-**Correlação**
-Medida estatística que indica a relação entre duas variáveis. Uma correlação positiva significa que quando uma variável aumenta, a outra tende a aumentar também. Não implica causalidade.
-→ [Saiba mais](https://pt.wikipedia.org/wiki/Coeficiente_de_correla%C3%A7%C3%A3o_de_Pearson)
-
-**Causalidade**
-Relação em que uma variável causa diretamente a mudança em outra. Diferente de correlação, exige evidência mais robusta para ser estabelecida.
-→ [Saiba mais](https://pt.wikipedia.org/wiki/Causalidade)
-
-**Outlier**
-Valor que se distancia significativamente dos demais em um conjunto de dados. Nesta análise, São Paulo se comporta como outlier por concentrar volume de ocorrências muito superior aos demais municípios.
-→ [Saiba mais](https://pt.wikipedia.org/wiki/Outlier)
-
-**Rubrica**
-Neste contexto, categoria jurídica do crime conforme o Código Penal Brasileiro (ex: Furto — art. 155).
-
-**Renda Média per capita**
-Indicador do IBGE que expressa a renda média das pessoas com 14 anos ou mais em um município, em reais, conforme o Censo Demográfico 2022.
-
-**Normalização de dados**
-Processo de padronizar valores para permitir comparação entre fontes diferentes — neste projeto, aplicado aos nomes dos municípios para cruzar as bases da SSP-SP e do IBGE.
+| Base | Fonte | Descrição |
+|---|---|---|
+| Dados Criminais SP 2025 | [SSP-SP](https://www.ssp.sp.gov.br/estatistica/dados-mensais) | Ocorrências de roubo, furto e lesão corporal por município |
+| Renda média per capita | [IBGE — Censo 2022](https://cidades.ibge.gov.br/) | Renda média per capita, 645 municípios de SP |
+| População (Tabela 4709) | IBGE, Censo 2022 | Denominador das taxas por 1.000 hab. |
+| Litorâneo/turístico | Classificação do grupo | Dummy (1/0), 16 municípios da costa paulista por padrão |
 
 ---
-## 👥 Integrantes
+
+## 🔍 Metodologia (resumo)
+
+Vizinhança espacial: contiguidade **queen** de ordem 1, pesos
+row-standardized (Ilhabela fica sem vizinhos — `zero.policy = TRUE`).
+
+1. **Correlação e autocorrelação espacial** — Pearson/Spearman; Moran's I
+   global e LISA (permutação condicional, 999 simulações).
+2. **Regressão linear clássica (OLS)** — simples (`taxa ~ renda`) e múltipla
+   (`taxa ~ renda + litoral`), com diagnóstico de resíduos.
+3. **Regressão espacial global** — testes de Multiplicadores de Lagrange para
+   escolher entre spatial lag e spatial error.
+4. **Regressão Geograficamente Ponderada (GWR)** — banda adaptativa
+   (k ≈ 10 vizinhos), coeficientes e R² locais, cenário contrafactual com o
+   litoral zerado.
+
+Resultado: o modelo final (GWR com renda e litoral) eleva o poder explicativo
+de R² = 0,129 (OLS simples) para R² = 0,532, com o menor AIC entre os modelos
+testados — ver o artigo completo para a discussão.
+
+---
+
+## 👥 Equipe
 
 | Nome | GitHub |
 |---|---|
@@ -175,8 +116,4 @@ Processo de padronizar valores para permitir comparação entre fontes diferente
 | Julio Cesar Salvino | [@euusoujc](https://github.com/euusoujc) |
 | Lucas Amorim | [@lucamorim](https://github.com/lucamorim) |
 
----
-
-## 👩‍🏫 Orientação
-
-**Professora Flávia da Fonseca Feitosa**
+**Orientação:** Prof.ª Flávia da Fonseca Feitosa

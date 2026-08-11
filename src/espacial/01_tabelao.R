@@ -58,7 +58,7 @@ construir_tabelao <- function() {
     distinct(cod_ibge, .keep_all = TRUE)
 
   # Universo: todos os municípios de SP na Tabela 4709 (população, IBGE)
-  pop <- read.csv(file.path(DIR_ROOT, "tabela4709.csv"),
+  pop <- read.csv(file.path(DIR_DOCS, "tabela4709.csv"),
                   fileEncoding = "UTF-8-BOM", stringsAsFactors = FALSE)
   colnames(pop) <- c("cod_ibge", "municipio", "populacao")
   pop <- pop |>
