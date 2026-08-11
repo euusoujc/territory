@@ -44,12 +44,15 @@ importado por `00_config.R`.
   `data/geoda_gwr_furto.gpkg` + `_shp/` — saída do GWR enxuto p/ mapear no GeoDa
 - `docs/guia_geoda.md`, `docs/guia_regressao_espacial.md`, `docs/guia_gwr_geoda.md`
   — roteiros passo a passo do GeoDa, com números de referência (R × GeoDa)
+- `docs/guia_apresentacao.md` — roteiro para apresentar `slides/`: o que
+  falar em cada slide e perguntas prováveis da banca
 - `outputs/` — relatório (relatorio.md), mapas, correlações, moran_global.csv,
   lisa_clusters.csv, resultados de regressão/GWR, analise_espacial.xlsx
   (tudo regenerado pelo pipeline)
-- `paper/relatorio_final_gwr.tex` — artigo final (modelo IEEE, PT-BR) com todo
-  o desenvolvimento: correlação → Moran/LISA → OLS → regressão espacial → GWR
-- `slides/` — apresentação da equipe (`.pptx` editável, `.html`, `.pdf`)
+- `paper/relatorio_final_gwr.tex` (+ `.pdf` compilado) — artigo final (modelo
+  IEEE, PT-BR): correlação → Moran/LISA → OLS → regressão espacial → GWR
+- `slides/` — apresentação da equipe: `build_apresentacao.py` gera
+  `apresentacao_final.pptx`; `.pdf` exportado para quem não abre pptx
 - `docs/*.xlsx` — bases originais (SSP-SP 2025 tratada, renda Censo 2022)
 
 ## Convenções e detalhes não óbvios
