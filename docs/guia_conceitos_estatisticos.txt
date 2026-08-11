@@ -1,513 +1,428 @@
 ================================================================================
-GUIA EXPLICATIVO DOS MÉTODOS ESTATÍSTICOS
+GUIA DE TERMOS E VALORES DA APRESENTAÇÃO
 Furto, Renda e Território — UFABC
 ================================================================================
 
-Este guia explica O QUE SÃO os métodos usados no projeto — os termos, o
-raciocínio por trás de cada um, e como ler os números — na ordem em que
-aparecem na análise: Correlação -> Cluster LISA (autocorrelação espacial) ->
-Regressão OLS clássica -> Regressão de modelo múltiplo -> Do espaço global
-ao local (regressão espacial e GWR).
+Este guia percorre a apresentação FINAL, slide a slide, na ordem em que ela
+foi apresentada, e explica CADA TERMO TÉCNICO e CADA VALOR que aparece na
+tela — o que a palavra significa e o que aquele número específico reflete.
+A ideia é que quem apresentar consiga responder, na hora, "o que é isso que
+está escrito aí?" para qualquer coisa no slide.
 
-Ele NÃO substitui os outros dois guias do projeto:
-  - guia_apresentacao.md    = o que FALAR em cada slide
-  - guia_projeto_completo.md = TODOS os números e resultados do projeto
-Este aqui é o "professor particular": explica o CONCEITO por trás de cada
-número, para quem vai apresentar entender o que está dizendo, não só decorar.
+Numeração: os slides abaixo seguem o rodapé de cada slide da versão final
+(alguns números foram removidos da apresentação original e por isso a
+numeração pula — normal, é só o rodapé antigo que ficou).
 
-Todos os exemplos numéricos usados aqui são os números reais do projeto.
-
-================================================================================
-1. CORRELAÇÃO (Pearson e Spearman)
-================================================================================
-
-O QUE É
---------
-Correlação mede O QUANTO duas variáveis "andam juntas". Não diz nada sobre
-causa e efeito — só diz se, quando uma sobe, a outra tende a subir também
-(correlação positiva) ou descer (correlação negativa), ou se não há relação
-perceptível (correlação perto de zero).
-
-COMO LER O NÚMERO
-------------------
-A correlação varia de -1 a +1:
-  -1  = relação negativa perfeita (quando X sobe, Y sempre desce na mesma
-        proporção)
-   0  = nenhuma relação linear perceptível
-  +1  = relação positiva perfeita (quando X sobe, Y sempre sobe na mesma
-        proporção)
-
-Na prática, em ciências sociais, valores acima de 0,5 (ou abaixo de -0,5) já
-são considerados "fortes"; entre 0,3 e 0,5, "moderados"; abaixo de 0,3,
-"fracos". NENHUMA correlação do projeto passa de 0,6 — ou seja, são todas
-moderadas ou fracas. Isso é importante: significa que a renda sozinha nunca
-explica bem o crime, o que é exatamente o gatilho para todo o resto da
-análise (regressão, modelos espaciais, GWR).
-
-PEARSON x SPEARMAN — QUAL A DIFERENÇA
----------------------------------------
-Pearson mede relação LINEAR (uma reta) e é sensível a outliers (pontos muito
-fora da curva, como São Paulo, que puxam o resultado).
-Spearman transforma os valores em RANKS (posições: 1º maior, 2º maior...) e
-mede se a ordem das duas variáveis é parecida. É mais "robusto" — outliers
-extremos pesam menos.
-
-Quando os dois números batem (como no projeto), é sinal de que a relação é
-consistente e não é artefato de um ou dois municípios estranhos.
-
-OS NÚMEROS DO PROJETO
------------------------
-                          Pearson   Spearman
-  Roubo x Renda            0,302     0,389
-  Furto x Renda            0,359     0,380
-  Lesão corporal x Renda  -0,190    -0,166
-  Roubo x Furto            0,544     0,567
-
-Leitura: roubo e furto sobem JUNTO com a renda — o oposto do que a hipótese
-inicial (H1: "mais crime em cidade pobre") previa. Só a lesão corporal cai
-com a renda, e fraco.
-
-IMPORTANTE PARA A APRESENTAÇÃO: "correlação não implica causalidade" não é
-só uma frase de efeito — significa literalmente que esse número (0,359) NÃO
-prova que renda "causa" furto. Ele só mostra um padrão que precisa ser
-investigado mais a fundo — e é isso que os métodos espaciais fazem depois.
+Este guia NÃO substitui os outros dois:
+  guia_apresentacao.md      = o que FALAR em cada slide
+  guia_projeto_completo.md  = TODOS os resultados do projeto, com mais
+                               detalhe do que coube nos slides finais
+Este aqui é o "dicionário" — para quando alguém (banca, colega, você mesmo
+revisando) apontar pra um termo ou número na tela e perguntar "o que é
+isso?".
 
 ================================================================================
-2. CLUSTER LISA (autocorrelação espacial local)
+SLIDE 2 — "A pergunta que originou o trabalho"
 ================================================================================
 
-PRIMEIRO: O QUE É AUTOCORRELAÇÃO ESPACIAL (MORAN'S I GLOBAL)
-----------------------------------------------------------------
-Correlação (seção 1) compara DUAS VARIÁVEIS (ex.: furto e renda).
-Autocorrelação espacial compara A MESMA VARIÁVEL COM ELA MESMA NO ESPAÇO:
-será que municípios vizinhos se parecem entre si? Isso é o que o índice de
-Moran (Moran's I) mede.
+Nada estatístico ainda. Só:
 
-A ideia por trás disso é chamada de "primeira lei da geografia" (Tobler,
-1970): "coisas próximas se parecem mais entre si do que coisas distantes."
-O Moran's I testa se essa lei vale para as taxas de crime.
-
-COMO LER O MORAN'S I
------------------------
-Mesma escala da correlação, de -1 a +1:
-   perto de 0   = distribuição aleatória no espaço (município alto do lado
-                  de município baixo, sem padrão)
-  positivo alto = "contágio": municípios parecidos ficam próximos uns dos
-                  outros, formando manchas no mapa
-  negativo      = padrão de tabuleiro de xadrez (raro em dados reais)
-
-VIZINHANÇA "QUEEN": para calcular isso, é preciso definir quem é "vizinho"
-de quem. O projeto usa contiguidade queen de ordem 1 — dois municípios são
-vizinhos se compartilham qualquer pedacinho de fronteira (como o movimento
-da rainha no xadrez, que anda em qualquer direção). Ilhabela, por ser uma
-ilha, não tem vizinhos nessa matriz.
-
-PERMUTAÇÃO: para saber se o Moran's I encontrado é "real" ou pode ter saído
-do acaso, o método embaralha os valores entre os municípios centenas de
-vezes (no projeto, 999 vezes) e verifica se o padrão observado é raro dentre
-todos os embaralhamentos possíveis. Se for (p = 0,001, ou seja, só 1 em
-1000 embaralhamentos aleatórios teria dado um resultado tão forte), o padrão
-é considerado estatisticamente significativo — não é coincidência.
-
-OS NÚMEROS DO PROJETO (MORAN'S I GLOBAL)
---------------------------------------------
-  Taxa de roubo            I = 0,832   (forte)     p = 0,001
-  Taxa de furto             I = 0,422   (moderada)  p = 0,001
-  Taxa de lesão corporal   I = 0,181   (fraca)      p = 0,001
-
-Leitura: nenhum dos três crimes está distribuído ao acaso no mapa. O roubo
-tem o padrão espacial mais forte (concentrado na Região Metropolitana), o
-furto um padrão moderado (o litoral), e a lesão corporal quase não tem
-padrão.
-
-AGORA SIM: O QUE É O LISA
------------------------------
-LISA = "Local Indicator of Spatial Association" (Anselin, 1995). É a versão
-LOCAL do Moran's I: em vez de UM número para o estado inteiro, o LISA
-calcula UM número PARA CADA MUNICÍPIO, medindo se ELE especificamente se
-parece com os vizinhos dele. Isso permite MAPEAR onde estão os agrupamentos,
-não só saber que eles existem.
-
-OS QUATRO QUADRANTES DO LISA
---------------------------------
-Cada município significativo cai em um dos quatro grupos:
-
-  ALTO-ALTO   = o município tem taxa alta E os vizinhos também têm taxa
-                alta. É um "hotspot" (foco quente) — no mapa, aparece em
-                vermelho. No furto, é a faixa litorânea inteira.
-
-  BAIXO-BAIXO = o município tem taxa baixa E os vizinhos também têm taxa
-                baixa. É um "coldspot" (foco frio) — aparece em azul. No
-                furto, é o oeste e centro-sul do estado.
-
-  ALTO-BAIXO e BAIXO-ALTO = "outliers espaciais": o município destoa dos
-                vizinhos (ex.: um município de taxa alta cercado de
-                vizinhos de taxa baixa). São bem mais raros e não têm um
-                papel central na história do projeto.
-
-OS NÚMEROS DO PROJETO (LISA, p <= 0,05)
---------------------------------------------
-                          Alto-Alto  Baixo-Baixo  Alto-Baixo  Baixo-Alto  Não signif.
-  Taxa de roubo               45          93           1           2         504
-  Taxa de furto                36          45           7           6         551
-  Taxa de lesão corporal      22          28           5           6         584
-
-Para o furto: 36 municípios formam o cluster Alto-Alto, acompanhando o
-litoral de Ubatuba a Cananéia. Desses 36, treze (36%) já são classificados
-como litorâneos/turísticos pelo grupo — a primeira evidência QUANTITATIVA
-de que a hipótese do turismo (H2) tem fundamento, obtida ANTES de qualquer
-regressão.
-
-NOTA SOBRE R x GEODA: rodando os mesmos dados no software GeoDa, os números
-saem um pouco diferentes (49 Alto-Alto e 67 Baixo-Baixo para o furto, em vez
-de 36 e 45). A GEOGRAFIA dos clusters é a mesma nos dois softwares — só a
-CONTAGEM exata varia, porque a permutação (o embaralhamento aleatório
-explicado acima) usa sorteios diferentes em cada implementação. O projeto
-sempre cita os números do R, para bater com o Moran's I global (que também
-vem do R). Ver docs/guia_geoda.md para a comparação completa.
+  H1 = "Hipótese 1", a hipótese inicial do trabalho (cidades mais pobres
+       registram mais crimes patrimoniais). É só um nome/etiqueta para a
+       hipótese, não é uma fórmula.
 
 ================================================================================
-3. MODELO CLÁSSICO OLS (REGRESSÃO LINEAR SIMPLES)
+SLIDE 3 — "Dados e variáveis"
 ================================================================================
 
-O QUE É OLS
--------------
-OLS significa "Ordinary Least Squares" (Mínimos Quadrados Ordinários). É o
-método de regressão linear mais básico: ele desenha UMA RETA que passa pelo
-meio da nuvem de pontos (município x renda, no caso), escolhida de forma a
-minimizar a soma dos erros ao quadrado (a distância vertical entre cada
-ponto real e a reta prevista).
+  Taxa (ex.: "ocorrências / 1.000 hab.")
+    Em vez de contar o número bruto de crimes, dividimos pelo tamanho da
+    população (e multiplicamos por 1.000). Isso permite comparar São Paulo
+    (11 milhões de habitantes) com um município pequeno de 5 mil habitantes
+    de forma justa — contagem bruta sempre favoreceria as cidades grandes.
 
-A EQUAÇÃO
-------------
-  taxa de furto = 0,971 + 0,00247 x renda
-
-Isso se lê assim:
-  0,971    = "intercepto" — a taxa de furto prevista para um município com
-             renda R$ 0 (só um ponto de referência matemático, não tem
-             leitura prática real aqui).
-  0,00247  = "coeficiente" (inclinação da reta) — a cada R$ 1 a mais de
-             renda média, a taxa de furto prevista sobe 0,00247 furtos por
-             1.000 habitantes. Para ficar mais intuitivo: R$ 1.000 a mais de
-             renda = +2,47 furtos/1.000 hab. previstos.
-
-O sinal POSITIVO desse coeficiente é o resultado central que contraria a
-hipótese H1 ("mais crime em cidade pobre"): se fosse verdade, esse número
-deveria ser NEGATIVO (mais renda = menos crime). Ele é positivo e
-estatisticamente significativo (p < 0,001, ou seja, a chance desse
-resultado ser só coincidência é menor que 0,1%).
-
-O QUE É R²
-------------
-R² (erre ao quadrado) mede quanto da VARIAÇÃO da variável que você quer
-prever (taxa de furto) o modelo consegue "explicar", numa escala de 0 a 1
-(ou 0% a 100%).
-
-  R² = 0,129  =>  a renda sozinha explica só 12,9% da variação da taxa de
-                  furto entre os municípios. Os outros 87,1% dependem de
-                  outros fatores que esse modelo simples não capta.
-
-Um R² baixo NÃO significa que o coeficiente está errado ou que a relação não
-existe — significa que a renda, sozinha, é uma explicação FRACA e
-INCOMPLETA. É exatamente esse "buraco" de 87% que o resto do projeto tenta
-preencher (litoral, depois espaço, depois GWR).
+  Dummy (1/0)
+    Uma variável "dummy" é uma variável que só pode valer 0 ou 1 — aqui,
+    "litorâneo/turístico" vale 1 se o município é um dos 16 da costa
+    paulista, e 0 para os outros 629. Serve para incluir uma característica
+    de categoria (é ou não é litorâneo) dentro de uma equação matemática.
 
 ================================================================================
-4. REGRESSÃO DE MODELO MÚLTIPLO
+SLIDE 4 — "Como o crime se distribui no espaço" (os três mapas)
 ================================================================================
 
-O QUE MUDA EM RELAÇÃO AO MODELO SIMPLES
---------------------------------------------
-O modelo múltiplo usa MAIS DE UMA variável explicativa ao mesmo tempo — no
-caso, renda E a condição litorânea/turística juntas.
+  Classes por quintis
+    Os municípios foram divididos em 5 grupos (quintis) de tamanho igual,
+    do 20% com taxa mais baixa ao 20% com taxa mais alta, e cada grupo
+    ganhou uma cor no mapa. É só uma forma de dividir a escala de cores de
+    modo que cada faixa tenha aproximadamente o mesmo número de municípios.
 
-  taxa de furto = 1,036 + 0,00233 x renda + 10,969 x litoral   R² = 0,357
-
-VARIÁVEL DUMMY (0/1)
------------------------
-"Litoral" aqui não é um número contínuo como renda — é uma variável
-"dummy" (binária): 1 se o município é litorâneo/turístico, 0 se não é. O
-coeficiente dela (10,969) tem uma leitura diferente do coeficiente da
-renda: não é "por unidade", é o EFEITO FIXO de estar no grupo 1 em vez do
-grupo 0.
-
-Leitura: mantendo a renda constante, um município litorâneo tem, em média,
-10,969 furtos a mais por 1.000 habitantes do que um município não-litorâneo
-de MESMA renda. Visualmente, isso é representado por DUAS RETAS PARALELAS
-no gráfico — mesma inclinação (mesmo efeito da renda), mas a reta dos
-litorâneos fica inteira deslocada para cima.
-
-Para dar uma régua concreta desse número: 10,969 furtos a mais equivale, em
-termos de efeito, ao mesmo impacto que TER MAIS R$ 4.700 DE RENDA MÉDIA
-teria pelo coeficiente da renda sozinho. Ou seja, "ser litorâneo" pesa tanto
-quanto uma diferença de renda considerável.
-
-POR QUE O R² SUBIU (0,129 -> 0,357)
-----------------------------------------
-Adicionar uma variável relevante que o modelo simples ignorava (litoral)
-recuperou parte da variação que antes ficava "sem explicação". Isso já é
-uma pista forte a favor de H2 (o turismo/litoral importa), mas ainda deixa
-64,3% sem explicar.
-
-MULTICOLINEARIDADE E VIF
-----------------------------
-Quando duas variáveis explicativas estão muito correlacionadas ENTRE SI (ex.
-"seria litoral e renda praticamente a mesma coisa?"), o modelo fica instável
-e os coeficientes perdem confiabilidade. O VIF (Variance Inflation Factor)
-mede isso: VIF = 1 (o valor encontrado no projeto) significa ausência TOTAL
-de multicolinearidade — renda e litoral são efeitos independentes um do
-outro, e podem ser interpretados separadamente sem problema.
-
-DISTÂNCIA DE COOK (OUTLIERS INFLUENTES)
---------------------------------------------
-Nem todo ponto no gráfico pesa igual na hora de desenhar a reta. A distância
-de Cook mede o quanto CADA município, individualmente, está "puxando" a
-reta para um lado. Municípios com distância de Cook acima de um limiar (aqui,
-4/n) são considerados "influentes".
-
-No projeto: 29 municípios influentes, dos quais 8 são litorâneos — ou seja,
-METADE dos 16 municípios litorâneos do estado aparece como ponto influente
-na reta de furto x renda. Isso não é coincidência: confirma que o padrão
-litorâneo é forte o bastante para "puxar" a reta sozinho.
-
-Teste de robustez: refazendo a regressão SEM esses 29 pontos influentes, a
-inclinação da renda sobe (de 0,00247 para 0,00288) e o R² sobe (de 0,13 para
-0,19). Ou seja: o efeito positivo da renda NÃO é um artefato de poucos
-pontos extremos — ele fica ainda mais forte quando os extremos saem da
-conta.
-
-DIAGNÓSTICOS DOS RESÍDUOS: SHAPIRO-WILK E NCVTEST
--------------------------------------------------------
-"Resíduo" é a diferença entre o valor real e o valor previsto pelo modelo
-para cada município. O OLS clássico assume duas coisas sobre os resíduos:
-
-  Shapiro-Wilk testa se os resíduos seguem uma distribuição NORMAL (curva de
-  sino). Resultado do projeto: p < 0,001 -> REJEITA normalidade (os
-  resíduos não são "bem-comportados").
-
-  ncvTest testa HOMOCEDASTICIDADE — se o tamanho do erro é parecido para
-  todos os municípios, independente do valor previsto. Resultado do
-  projeto: p < 0,001 -> REJEITA homocedasticidade (o erro varia de
-  tamanho, tipicamente maior nos municípios com taxas mais altas/extremas).
-
-Essas duas rejeições são ESPERADAS em dados de criminalidade (taxas são
-assimétricas, cheias de valores baixos e alguns poucos muito altos) e
-servem como justificativa técnica para não parar no OLS — mas ainda não são
-o motivo de sair para modelos ESPACIAIS especificamente. Esse motivo vem
-na próxima seção.
+  OBS da Professora: "pessoal resolve na peixeira"
+    Comentário da orientadora sobre a lesão corporal ter menos estrutura
+    espacial que roubo/furto — como é um crime mais "de ocasião"/pessoal
+    (brigas, desentendimentos), ele não segue um padrão geográfico de
+    riqueza, turismo ou urbanização tão claro quanto os crimes patrimoniais.
 
 ================================================================================
-5. DO ESPAÇO GLOBAL AO LOCAL (regressão espacial e GWR)
+SLIDE 5 — "Por que o furto: cada crime tem seus outliers"
 ================================================================================
 
-Esta é a parte mais conceitualmente densa do projeto. Vale ler com calma.
+  Outlier
+    Um ponto (município) que fica muito distante do padrão geral dos
+    outros — muito acima ou muito abaixo da "nuvem" principal de pontos no
+    gráfico. Aqui, os outliers do furto são Mongaguá e outros municípios
+    litorâneos, com taxas muito acima do esperado pela renda deles.
 
-A REVIRAVOLTA NA HISTÓRIA (leia isso primeiro)
-----------------------------------------------------
-A partir daqui, o projeto DELIBERADAMENTE deixa a variável litoral de lado
-de novo e volta a trabalhar só com "taxa de furto ~ renda" (o modelo
-simples, fraco, R² = 0,129) — não o modelo múltiplo do capítulo anterior.
+  Dispersão (o gráfico de pontos)
+    Cada ponto é um município; a posição horizontal é a renda, a vertical é
+    a taxa do crime. É a forma mais crua de visualizar se duas variáveis
+    parecem estar relacionadas, antes de qualquer cálculo.
 
-Por quê? Porque a pergunta muda. Até aqui, a pergunta era "quais variáveis
-explicam o furto?". A partir daqui, a pergunta é: "será que dá pra recuperar
-esse mesmo ganho de poder explicativo SÓ usando a estrutura espacial dos
-dados, sem precisar saber de antemão que o litoral existe?" A resposta,
-como será visto, é: quase todo ele.
+  Reta tracejada
+    A "reta de ajuste linear" — a mesma reta que a regressão OLS calcula
+    (ver slide 8). Aqui ela só ilustra a tendência geral: se a maioria dos
+    pontos sobe da esquerda para a direita, a relação é positiva.
 
-Isso é usado como PROVA: se um método genérico (que não sabe nada sobre
-turismo) recupera boa parte do que "litoral" explicava, isso reforça que o
-litoral é mesmo a explicação por trás do padrão espacial — e não é coincidência.
+================================================================================
+SLIDE 6 — "A renda correlaciona positivamente com o furto"
+================================================================================
 
-POR QUE O OLS "FALHA" NO ESPAÇO
--------------------------------------
-O OLS assume que os erros de cada observação são INDEPENDENTES entre si —
-o erro de um município não deveria ter relação com o erro do município
-vizinho. Só que, quando calculamos o Moran's I DOS RESÍDUOS do modelo
-simples (taxa ~ renda), o resultado é:
+  Correlação (Pearson e Spearman)
+    Mede de -1 a +1 o quanto duas variáveis "andam juntas". Perto de 0 =
+    sem relação; perto de +1 = quando uma sobe, a outra sobe junto; perto
+    de -1 = quando uma sobe, a outra desce. NÃO prova que uma causa a
+    outra — só mostra um padrão.
 
-  Moran's I dos resíduos = 0,38   (p < 0,001)
+    Pearson mede relação em LINHA RETA e é sensível a outliers (pontos
+    muito extremos, tipo São Paulo, pesam mais no cálculo).
+    Spearman usa a ORDEM/RANKING dos valores em vez do valor exato — é mais
+    resistente a outliers. Quando os dois números batem (como aqui), o
+    resultado é mais confiável.
 
-Isso é uma autocorrelação espacial FORTE nos ERROS do modelo — municípios
-vizinhos erram parecido, e olhando o mapa, esse erro se concentra
-visivelmente no litoral. Na prática, isso é o efeito litorâneo "escondido"
-dentro do erro, porque o modelo não sabe que essa variável existe. Essa
-violação invalida os testes estatísticos do OLS (erros-padrão, p-valores) e
-é o motivo TÉCNICO (não só uma escolha de estilo) para mudar de método.
+  Os valores do slide:
+    Furto x Renda: Pearson 0,359 / Spearman 0,380 — correlação moderada e
+    positiva (o oposto do que a hipótese inicial previa).
 
-TESTES DE MULTIPLICADORES DE LAGRANGE (LM)
-------------------------------------------------
-Antes de escolher qual modelo espacial usar, existem dois "candidatos"
-principais: spatial lag e spatial error (explicados abaixo). Os testes de
-LM comparam estatisticamente qual dos dois se encaixa melhor nos dados,
-antes mesmo de rodar os modelos completos.
+  Matriz de correlação (o mapa de calor ao lado)
+    A mesma informação da tabela, mas em forma de grade colorida: vermelho
+    = correlação positiva forte, azul = negativa forte, branco = perto de
+    zero. Cada célula é a correlação de Pearson entre o par de variáveis
+    daquela linha e coluna.
 
-                    Estatística   p-valor
-  LM (lag)             217,4      < 0,001
-  LM (error)           238,9      < 0,001
-  Robust LM (lag)        1,23       0,267    (não significativo)
-  Robust LM (error)     22,8      < 0,001    (significativo)
+================================================================================
+SLIDE 7 — "O crime tem endereço: autocorrelação espacial"
+================================================================================
 
-A versão "robusta" desses testes é a que decide de verdade (ela corrige a
-interferência de um efeito sobre o outro). Como só o Robust LM (error) deu
-significativo, o modelo indicado é o SPATIAL ERROR.
+Este é o slide mais denso de termos novos. Vale ler com calma.
 
-SPATIAL LAG x SPATIAL ERROR — A DIFERENÇA CONCEITUAL
-----------------------------------------------------------
-Os dois tratam a dependência espacial, mas de formas diferentes:
+  Autocorrelação espacial
+    Diferente de correlação (que compara DUAS variáveis diferentes),
+    autocorrelação espacial pergunta: será que os valores da MESMA
+    variável se parecem entre municípios VIZINHOS? Ou seja: será que
+    municípios com taxa de furto alta ficam perto uns dos outros no mapa,
+    em vez de espalhados aleatoriamente?
 
-  SPATIAL LAG (rho): assume que a taxa de furto de um município é
-  diretamente influenciada pela taxa de furto DOS VIZINHOS — um efeito de
-  "contágio" ou "transbordamento" direto entre municípios (ex.: criminosos
-  se deslocam para municípios vizinhos).
+  Moran's I (o valor "I = 0,422" no slide)
+    É o número que mede essa autocorrelação espacial, também numa escala
+    parecida com a correlação: perto de 0 = padrão aleatório no mapa; alto
+    e positivo = os municípios parecidos realmente se agrupam no espaço
+    (formam "manchas"), como acontece aqui.
+    I = 0,422 para o furto é classificado como "moderado" — nem fraco, nem
+    tão forte quanto o do roubo (que é 0,832, não mostrado neste slide da
+    versão final, mas está no guia_projeto_completo.md).
 
-  SPATIAL ERROR (lambda): assume que a dependência espacial está no ERRO,
-  não na variável em si — ou seja, existe uma variável OMITIDA (que o
-  modelo não incluiu) que É espacialmente agrupada e afeta municípios
-  vizinhos de forma parecida. Não é contágio direto entre furtos; é um
-  fator externo compartilhado.
+  p = 0,001 (999 permutações)
+    Para confirmar que o Moran's I encontrado não foi por acaso, o
+    computador embaralha aleatoriamente as taxas entre os municípios 999
+    vezes e recalcula o Moran's I a cada vez. Se o valor real (0,422) for
+    mais extremo que quase todos os 999 embaralhamentos aleatórios, o
+    resultado é considerado "estatisticamente significativo". p = 0,001
+    quer dizer que só 1 em 1.000 embaralhamentos aleatórios teria dado um
+    resultado tão forte — ou seja, a chance de isso ser coincidência é de
+    0,1%, bem baixa.
 
-No projeto, o spatial error é o escolhido (pelos testes de LM) — e essa
-escolha CASA PERFEITAMENTE com a hipótese do trabalho: a variável omitida
-espacialmente agrupada É o litoral/turismo, não um efeito de "contágio" de
-furto entre cidades vizinhas.
+  Cluster LISA / clusters "Alto-Alto"
+    LISA é a versão LOCAL do Moran's I: em vez de UM número para o estado
+    inteiro, calcula UM número PARA CADA MUNICÍPIO, permitindo desenhar o
+    mapa de clusters que aparece no slide. Cada município significativo
+    cai em um grupo:
+      Alto-Alto   = taxa alta E vizinhos com taxa alta (é o que forma a
+                    faixa vermelha no litoral, no mapa do furto)
+      Baixo-Baixo = taxa baixa E vizinhos com taxa baixa (o azul, no
+                    oeste/centro-sul do estado)
+    "36 municípios em cluster Alto-Alto, 36% já são litorâneos/turísticos"
+    — esse número (36%) é o quanto da classificação litorânea do grupo já
+    "bate" com o cluster de crime alto, ANTES de qualquer regressão. É a
+    primeira pista quantitativa a favor da hipótese do turismo.
 
-  Spatial Error: lambda = 0,588   R² = 0,392   AIC = 3220,6
+================================================================================
+SLIDE 8 — "Regressão clássica" (as equações)
+================================================================================
 
-lambda (0,588) mede a força dessa dependência no erro — quanto mais perto
-de 1, mais forte. Depois de ajustar o modelo, o Moran's I dos resíduos cai
-de 0,38 para -0,03 — ou seja, o problema de autocorrelação nos erros
-praticamente desaparece.
+  Regressão / OLS (Ordinary Least Squares, Mínimos Quadrados Ordinários)
+    Método que desenha UMA RETA que melhor resume a relação entre renda e
+    taxa de furto, escolhida para minimizar o erro entre a reta e os
+    pontos reais.
 
-O QUE É AIC (E POR QUE ELE APARECE JUNTO COM O R²)
---------------------------------------------------------
-AIC (Critério de Informação de Akaike) é outra forma de comparar modelos,
-além do R². Diferente do R² (que só cresce ou fica igual quando se
-adicionam variáveis, mesmo inúteis), o AIC PENALIZA modelos desnecessariamente
-complexos. Regra prática: QUANTO MENOR o AIC, melhor o modelo — ele equilibra
-"explica bem" com "não é complexo à toa". É por isso que o projeto sempre
-cita os dois números juntos (R² alto E AIC baixo = modelo realmente melhor,
-não só "mais parâmetros").
+  Como ler "taxa = 0,971 + 0,00247 x renda":
+    0,971    = intercepto — valor previsto da reta quando renda = 0 (só
+               referência matemática, sem leitura prática aqui).
+    0,00247  = coeficiente da renda — a cada R$ 1 a mais de renda média, a
+               taxa de furto prevista sobe 0,00247 (ou seja, R$ 1.000 a
+               mais de renda = +2,47 furtos/1.000 hab. previstos). O sinal
+               POSITIVO é o resultado central que contraria a hipótese
+               inicial.
+    10,97    = coeficiente do litoral (equação de baixo) — como litoral é
+               uma dummy (0/1, ver slide 3), esse número não é "por
+               unidade": é o quanto a taxa sobe SÓ por o município ser
+               litorâneo, mantendo a renda igual.
 
-O QUE É GWR (REGRESSÃO GEOGRAFICAMENTE PONDERADA)
---------------------------------------------------------
-GWR = "Geographically Weighted Regression". É o método mais sofisticado do
-projeto. A diferença fundamental em relação a TODOS os modelos anteriores
-(OLS simples, OLS múltiplo, spatial lag, spatial error): todos eles ajustam
-UM ÚNICO coeficiente para o estado inteiro (uma reta só, ou um lambda só).
-O GWR ajusta UMA REGRESSÃO DIFERENTE PARA CADA MUNICÍPIO, deixando o
-coeficiente da renda variar de lugar para lugar.
+  R² (erre ao quadrado)
+    Mede quanto da VARIAÇÃO da taxa de furto entre municípios o modelo
+    consegue explicar, de 0 (nada) a 1 (tudo, 100%).
+      R² = 0,129 (só renda)          -> explica 12,9% da variação
+      R² = 0,357 (renda + litoral)   -> explica 35,7% da variação
+    Adicionar o litoral quase triplicou o poder explicativo do modelo —
+    prova de que essa variável é relevante. Mas ainda sobra 64,3% sem
+    explicação, o que motiva os slides seguintes.
 
-COMO FUNCIONA (KERNEL GAUSSIANO E BANDA ADAPTATIVA)
-----------------------------------------------------------
-Para calcular a regressão "local" de um município, o GWR usa os OUTROS
-municípios como dados de treino, mas dá PESO MAIOR aos vizinhos mais
-próximos e peso menor aos mais distantes. Essa ponderação segue uma curva
-em formato de sino (kernel gaussiano): peso = 1 bem no centro, caindo suave
-e continuamente conforme a distância aumenta.
+================================================================================
+SLIDE 9 — "Regressão clássica" (o mapa de resíduos)
+================================================================================
 
-"Banda" é o quão longe essa curva de peso alcança. O projeto usa banda
-ADAPTATIVA: em vez de uma distância fixa em km, a banda se ajusta para
-sempre incluir aproximadamente os mesmos ~10 vizinhos mais próximos — por
-isso, em áreas com poucos municípios por perto (litoral sul, por exemplo),
-a banda em km precisa ser maior para "alcançar" 10 vizinhos; em áreas densas
-(região metropolitana), a banda em km é menor.
+Mesmo título do slide 8 na versão final, mas assunto diferente: aqui a
+pergunta é "esse modelo (só com renda) tem algum problema escondido?".
 
-RESULTADOS DO GWR NO PROJETO
----------------------------------
-  GWR (só renda):          R² = 0,458   -- ainda sem citar litoral!
-  GWR (renda + litoral):   R² = 0,532   AIC = 3027,4  (melhor modelo de todos)
+  Resíduo
+    A diferença entre o valor REAL observado e o valor PREVISTO pelo
+    modelo, para cada município. Resíduo positivo = o modelo previu menos
+    furto do que realmente aconteceu ali; negativo = previu mais do que
+    aconteceu.
 
-No GWR só com renda, o coeficiente local varia de -0,00216 a +0,00562 pelo
-estado — positivo na maior parte, mas INVERTIDO (negativo) num bolsão do
-noroeste. Isso seria IMPOSSÍVEL de enxergar num modelo global de coeficiente
-único: a relação renda-furto não é a mesma em todo lugar. O coeficiente é
-estatisticamente significativo (|t| > 1,96) em 72% dos municípios.
+  Moran's I dos resíduos = 0,38
+    O mesmo conceito do slide 7, mas aplicado aos ERROS do modelo em vez
+    da taxa bruta. Um valor alto aqui (0,38) é um PROBLEMA: significa que
+    o modelo erra de forma parecida em municípios vizinhos — sobrou um
+    padrão espacial que a renda sozinha não capturou. Olhando o mapa, esse
+    erro concentra visivelmente no litoral.
 
-FECHANDO O CÍRCULO: A TABELA FINAL
----------------------------------------
-              Sem litoral   Com litoral   Diferença
-  OLS             0,129        0,357       +0,228
-  Spatial Error   0,392        0,444       +0,052
-  GWR             0,458        0,532       +0,074
+  "Premissa de independência do OLS"
+    A regressão OLS (slide 8) assume que o erro de um município não tem
+    relação com o erro do vizinho. O Moran's I = 0,38 mostra que essa
+    suposição é falsa aqui — o que torna os resultados do OLS (intervalos
+    de confiança, testes de significância) pouco confiáveis, e é o motivo
+    técnico para os modelos espaciais que seguem no slide 10.
 
-Esta tabela é a "prova matemática" da reviravolta explicada no início desta
-seção: o GANHO de adicionar litoral fica cada vez MENOR conforme o modelo
-fica espacialmente mais sofisticado (+0,228 -> +0,052 -> +0,074, sempre bem
-menor que o primeiro salto). Isso mostra que os modelos espaciais (spatial
-error e GWR) já estavam CAPTANDO boa parte do "efeito litoral" só pela
-estrutura geográfica dos dados — mesmo sem que ninguém tivesse contado a
-eles quais municípios são turísticos. Quando o litoral entra explicitamente
-no melhor modelo (GWR), o resultado final e vencedor do projeto é:
+================================================================================
+SLIDE 10 — "O espaço importa: do global ao local"
+================================================================================
 
-  GWR com renda + litoral:  R² = 0,532  (o maior de todos)
-                              AIC = 3027,4 (o menor de todos, logo o melhor
-                              equilíbrio entre explicar bem e não ser
-                              complexo à toa)
+  Spatial Error
+    Um tipo de regressão espacial que assume que a autocorrelação (o
+    problema visto no slide 9) está no ERRO do modelo — ou seja, existe
+    algo não incluído no modelo (aqui, entende-se que é o litoral) que é
+    espacialmente agrupado e afeta municípios vizinhos de forma parecida.
+
+  λ (lambda) = 0,588
+    É o "tamanho" dessa dependência espacial no erro, também numa escala
+    onde valores mais altos (mais perto de 1) indicam dependência mais
+    forte. 0,588 é considerado um valor alto/forte.
+
+  "resíduo: 0,38 -> -0,03"
+    Depois de ajustar o modelo Spatial Error, o Moran's I dos resíduos cai
+    de 0,38 (problema forte) para -0,03 (praticamente zero) — ou seja, o
+    problema de autocorrelação nos erros foi resolvido.
+
+  GWR (Geographically Weighted Regression, Regressão Geograficamente
+  Ponderada)
+    O modelo mais sofisticado do trabalho. Diferença fundamental: em vez
+    de UMA reta/coeficiente único para o estado inteiro (como todos os
+    modelos anteriores), o GWR calcula uma regressão DIFERENTE para CADA
+    município, dando mais peso aos municípios vizinhos próximos.
+
+  Banda adaptativa (~10 vizinhos)
+    Define até onde o GWR "olha" para calcular a regressão de cada
+    município. "Adaptativa" significa que, em vez de uma distância fixa em
+    km, o alcance se ajusta para sempre pegar aproximadamente os mesmos
+    ~10 vizinhos mais próximos — por isso a distância em km muda de
+    município para município (ver slide 13).
+
+  R² = 0,392 / 0,458 / 0,532 (as três caixas)
+    O mesmo conceito do slide 8, comparando os três modelos: Spatial Error
+    (0,392) < GWR só renda (0,458) < GWR com renda e litoral (0,532, o
+    melhor de todos).
+
+  AIC (Critério de Informação de Akaike) = 3027,4
+    Outra forma de comparar modelos, além do R². Diferença importante: o
+    R² só aumenta (ou fica igual) quando se adiciona qualquer variável,
+    mesmo inútil; o AIC PENALIZA complexidade desnecessária. Regra:
+    QUANTO MENOR o AIC, melhor o modelo. O GWR com litoral tem o menor AIC
+    entre todos os testados — confirma que ele é o melhor modelo mesmo
+    descontando a complexidade extra.
+
+================================================================================
+SLIDE 12 — "Onde o modelo erra: o rastro da população flutuante"
+================================================================================
+
+  Correlação resíduo x litoral = 0,51 (no subtítulo do mapa)
+    Mede o quanto o ERRO do modelo (sem a variável litoral) está associado
+    a ser ou não litorâneo. 0,51 é uma correlação moderada/forte: confirma
+    visualmente que o modelo erra sistematicamente PARA CIMA nos
+    municípios litorâneos (mesmo conceito de correlação do slide 6, agora
+    aplicado ao erro do modelo em vez da taxa bruta).
+
+  Numerador e denominador (o mecanismo)
+    Numerador = a parte de cima de uma fração; aqui, o número de
+    ocorrências de furto. Denominador = a parte de baixo; aqui, a
+    população residente (do Censo). A taxa = numerador ÷ denominador x
+    1.000. A explicação do slide é que o numerador incha no verão
+    (turistas cometendo/sofrendo furtos), mas o denominador continua
+    contando só quem mora fixo ali — inflando artificialmente a taxa
+    calculada para municípios turísticos.
+
+================================================================================
+SLIDE 13 — "Quanto R$ 1 de renda pesa — e onde falha"
+================================================================================
+
+Esse slide tem a maior densidade de termos técnicos por metro quadrado da
+apresentação. Cada linha da tabela:
+
+  Banda (GWR) — 23,6 km (SP) / 41,9 km (Mongaguá)
+    Já explicada no slide 10: é o alcance que o GWR usa para calcular a
+    regressão LOCAL daquele município específico, em km. É maior em
+    Mongaguá porque a região tem municípios mais espalhados/menos densos —
+    é preciso "alcançar" mais longe para reunir os mesmos ~10 vizinhos.
+
+  β renda (beta, "coeficiente local da renda") — 0,00156 (SP) / 0,00019
+  (Mongaguá)
+    É o MESMO tipo de coeficiente do slide 8 (quanto a taxa sobe para cada
+    R$ 1 a mais de renda) — mas calculado SÓ com os vizinhos próximos
+    daquele município específico, não para o estado inteiro. Em São Paulo,
+    o efeito da renda é bem mais forte (0,00156) do que em Mongaguá
+    (0,00019, quase zero).
+
+  t (estatística t) — 3,28 (SP, "significativo") / 0,46 (Mongaguá, "não
+  significativo")
+    ESTE É O TERMO QUE MAIS GERA DÚVIDA — explicação completa:
+    A estatística t responde à pergunta "esse coeficiente (β) é confiável,
+    ou pode ser só ruído estatístico?". Ela é calculada dividindo o
+    coeficiente pelo seu erro-padrão (uma medida de quanta incerteza existe
+    na estimativa): t = β / erro-padrão. Quanto MAIOR o valor absoluto de
+    t, mais confiável é o coeficiente.
+    A REGRA PRÁTICA usada no projeto: |t| > 1,96 é considerado
+    "estatisticamente significativo" (esse 1,96 vem da distribuição normal
+    e corresponde a um nível de confiança de 95% — é um valor de
+    referência padrão em estatística, não específico deste projeto).
+      Em São Paulo, t = 3,28 (> 1,96) -> SIGNIFICATIVO: pode-se confiar
+      que o efeito da renda ali é real, não coincidência.
+      Em Mongaguá, t = 0,46 (< 1,96) -> NÃO SIGNIFICATIVO: o coeficiente
+      calculado (0,00019) é tão pequeno e incerto que, estatisticamente,
+      equivale a dizer "não dá para afirmar que a renda tem efeito algum
+      no furto de Mongaguá". É exatamente esse "não sabemos, e tudo bem
+      não saber" que sustenta a leitura de que, em Mongaguá, outra coisa
+      (o turismo) está dominando o fenômeno, não a renda.
+
+  R² local — 0,31 (SP) / 0,18 (Mongaguá)
+    Mesmo conceito de R² do slide 8, mas calculado só para a vizinhança
+    daquele município (não para o estado inteiro). Mostra que mesmo o
+    "melhor caso" (São Paulo) só explica 31% da variação local — ainda
+    assim, mais confiável do que os 18% de Mongaguá, ESPECIALMENTE porque
+    em Mongaguá o coeficiente nem é significativo (ver "t" acima).
+
+  Furto previsto / Resíduo — 13,7 / +11,5 (SP) e 13,2 / +21,0 (Mongaguá)
+    "Furto previsto" é o que o modelo GWR estimaria para aquele município;
+    "resíduo" é a diferença entre o valor REAL observado e essa previsão
+    (mesmo conceito do slide 9). O resíduo de Mongaguá (+21,0) é quase o
+    dobro do de São Paulo (+11,5) — e como o coeficiente da renda ali nem
+    é confiável (t=0,46), a leitura do projeto é que esse erro grande é,
+    em boa parte, reflexo da população turística que o modelo não
+    consegue captar.
+
+================================================================================
+SLIDE 15 — "Conclusão: turismo influencia no resultado"
+================================================================================
+
+Não há termos novos aqui — é a síntese dos três pontos, recapitulando R²
+(slide 8) e autocorrelação espacial nos resíduos (slide 9), já explicados
+acima.
 
 ================================================================================
 GLOSSÁRIO RÁPIDO (ORDEM ALFABÉTICA)
 ================================================================================
 
-AIC                 Critério que compara modelos penalizando complexidade
-                     desnecessária. Menor = melhor.
+AIC                  Critério que compara modelos penalizando complexidade
+                      desnecessária. Menor = melhor. (slide 10)
 
-Autocorrelação       O quanto uma variável se parece com ela mesma no
-espacial             espaço (municípios vizinhos parecidos ou não).
+Alto-Alto            Cluster LISA: município de taxa alta cercado de
+                      vizinhos de taxa alta. (slide 7)
 
-Banda (GWR)          Distância/número de vizinhos usado para calcular a
-                     regressão local de cada município no GWR.
+Autocorrelação        O quanto uma variável se parece com ela mesma entre
+espacial              municípios vizinhos no mapa. (slides 7, 9)
 
-Coeficiente          O "peso" de uma variável explicativa na equação de
-                     regressão; o quanto Y muda para cada unidade de X.
+Banda (GWR)           Distância/nº de vizinhos usado para calcular a
+                      regressão local de cada município no GWR. (slides
+                      10, 13)
 
-Correlação           Medida de -1 a +1 de quanto duas variáveis andam
-                     juntas. Não implica causalidade.
+β (beta) / coeficiente O "peso" de uma variável na equação de regressão —
+                      quanto a variável prevista muda para cada unidade da
+                      variável explicativa. (slides 8, 13)
 
-Dummy (variável)     Variável binária (0 ou 1) usada para representar uma
-                     categoria (ex.: litorâneo ou não).
+Correlação            Medida de -1 a +1 de quanto duas variáveis andam
+                      juntas. Não implica causalidade. (slide 6)
 
-Distância de Cook    Mede o quanto um ponto específico influencia/puxa a
-                     reta de regressão.
+Dummy (variável)      Variável que só vale 0 ou 1, usada para representar
+                      uma categoria (ex.: litorâneo ou não). (slide 3)
 
-Kernel gaussiano     Função em formato de sino usada pelo GWR para dar mais
-                     peso a vizinhos próximos e menos a distantes.
+GWR                  Geographically Weighted Regression — regressão que
+                      calcula um coeficiente diferente para cada
+                      município, em vez de um único para o estado. (slide
+                      10, 13)
 
-LISA                 Versão LOCAL do Moran's I: um índice por município,
-                     que permite mapear onde estão os clusters espaciais.
+Intercepto           Valor previsto pela regressão quando todas as
+                      variáveis explicativas valem zero. (slide 8)
 
-Moran's I            Índice de autocorrelação espacial GLOBAL (um número só
-                     para o estado inteiro).
+λ (lambda)           Força da dependência espacial no modelo Spatial
+                      Error. Mais perto de 1 = mais forte. (slide 10)
 
-OLS                  Ordinary Least Squares — regressão linear clássica,
-                     ajusta uma reta única minimizando erros ao quadrado.
+Moran's I            Índice de autocorrelação espacial: mede se valores
+                      parecidos se agrupam no mapa. (slides 7, 9, 10)
 
-Permutação           Método de embaralhar os dados centenas de vezes para
-(999 permutações)    testar se um padrão observado é estatisticamente
-                     significativo ou fruto do acaso.
+OLS                  Ordinary Least Squares — regressão linear clássica.
+                      (slide 8)
 
-p-valor              Probabilidade de um resultado tão forte quanto o
-                     observado ter saído só por acaso. Menor = mais
-                     confiável (convenção: p < 0,05 já é "significativo").
+Outlier              Ponto/município que destoa muito do padrão geral dos
+                      demais. (slide 5)
 
-Queen (contiguidade) Regra de vizinhança: municípios são vizinhos se
-                     compartilham qualquer trecho de fronteira.
+p (p-valor)           Probabilidade de um resultado tão forte quanto o
+                      observado ter saído só por acaso. Menor = mais
+                      confiável. (slide 7)
+
+Permutação            Embaralhar os dados centenas de vezes para testar se
+(999 permutações)     um padrão é estatisticamente significativo ou fruto
+                      do acaso. (slide 7)
+
+Quintis              Divisão de um conjunto de valores em 5 grupos de
+                      tamanho igual, do menor ao maior. (slide 4)
 
 R²                   Proporção da variação da variável dependente que o
-                     modelo consegue explicar (0 a 1, ou 0% a 100%).
+                      modelo consegue explicar (0 a 1 = 0% a 100%). Quanto
+                      maior, melhor o ajuste. (slides 8, 10, 13)
 
-Spatial Error        Modelo espacial que assume que a dependência espacial
-                     está no erro (variável omitida agrupada no espaço).
+Resíduo              A diferença entre o valor real observado e o valor
+                      previsto pelo modelo. (slides 5, 9, 12, 13)
 
-Spatial Lag          Modelo espacial que assume que a variável de interesse
-                     é diretamente influenciada pelos valores dos vizinhos.
+Spatial Error         Modelo espacial que assume que a dependência
+                      espacial está no erro (existe algo não incluído no
+                      modelo que é espacialmente agrupado). (slide 10)
 
-VIF                  Variance Inflation Factor — mede multicolinearidade
-                     (se duas variáveis explicativas são redundantes entre
-                     si). VIF = 1 é ausência total do problema.
+t (estatística t)     Mede se um coeficiente é estatisticamente confiável
+                      (t = coeficiente / erro-padrão). |t| > 1,96 é
+                      considerado significativo. (slide 13 — ver
+                      explicação completa acima)
 
 ================================================================================
-Fontes dos números: outputs/*.csv, data/geoda_gwr_furto.gpkg e
-paper/relatorio_final_gwr.tex (pipeline: Rscript run_espacial.R).
-Ver também: docs/guia_projeto_completo.md (todos os resultados) e
+Fontes dos valores: outputs/*.csv, data/geoda_gwr_furto.gpkg e o próprio
+PDF final da apresentação. Ver também: docs/guia_projeto_completo.md (todos
+os resultados, incluindo os que saíram da versão final dos slides) e
 docs/guia_apresentacao.md (o que falar em cada slide).
 ================================================================================

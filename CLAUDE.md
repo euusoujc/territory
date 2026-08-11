@@ -50,9 +50,16 @@ importado por `00_config.R`.
 - `docs/guia_apresentacao.md` — roteiro slide a slide de `slides/`, em duas
   camadas (essencial + complemento), cada complemento apontando para a
   seção correspondente em `guia_projeto_completo.md`
-- `docs/guia_conceitos_estatisticos.txt` — explica os MÉTODOS em si
-  (correlação, LISA, OLS, modelo múltiplo, spatial error/GWR): o que cada
-  termo significa e como ler cada número, não só o resultado final
+- `docs/guia_conceitos_estatisticos.txt` — glossário slide a slide da
+  apresentação FINAL (mesma numeração de `guia_apresentacao.md`): o que
+  cada termo (Moran's I, LISA, t, R², AIC, lambda...) significa e o que
+  cada número na tela reflete
+- ⚠️ a apresentação final foi editada manualmente em PowerPoint (slides de
+  contrafactual do GWR e comparação final dos modelos foram cortados,
+  textos simplificados) — `slides/apresentacao_final.pptx` neste repo
+  reflete a versão gerada por `build_apresentacao.py`, que pode já não
+  bater 100% com o que foi de fato apresentado; os dois guias acima já
+  foram atualizados para a versão final real
 - `outputs/` — relatório (relatorio.md), mapas, correlações, moran_global.csv,
   lisa_clusters.csv, resultados de regressão/GWR, analise_espacial.xlsx
   (tudo regenerado pelo pipeline)
