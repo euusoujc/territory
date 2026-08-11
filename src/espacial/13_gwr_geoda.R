@@ -103,23 +103,13 @@ p_box <- ggplot(box_df, aes(modelo, residuo, fill = modelo)) +
 ggsave(file.path(DIR_OUT, "gwrfr_residuos_boxplot.png"), p_box, width = 8, height = 6, dpi = 150)
 cat("✓ gwrfr_residuos_boxplot.png\n")
 
-# ---- exemplo do cálculo: pesos gaussianos de um alvo ---------
+# ---- exemplo do cálculo: banda local de um alvo (São Paulo) --
 cent <- sf::st_coordinates(sf::st_centroid(sf::st_geometry(gg)))
 alvo <- which(gg$cod_ibge == "3550308")            # São Paulo
 gc_dist <- spDists(cent, cent[alvo, , drop = FALSE], longlat = TRUE)[, 1]
 k <- round(bw * nrow(gg))                           # nº efetivo de vizinhos
 h <- sort(gc_dist)[k]                               # banda adaptativa local (km)
-gg$peso_alvo <- exp(-0.5 * (gc_dist / h)^2)         # kernel gaussiano
 b_local_alvo <- gg$b_renda[alvo]
-
-p_pesos <- ggplot(gg) +
-  geom_sf(aes(fill = peso_alvo), colour = "white", linewidth = 0.05) +
-  scale_fill_gradient(low = "#f7f7f7", high = "#08519c") +
-  labs(title = "Como o GWR calcula: pesos em torno de um município",
-       subtitle = sprintf("Regressão local de São Paulo: vizinhos pesados por distância (banda ~%d municípios, %.0f km)", k, h),
-       fill = "Peso", caption = FONTE_DADOS) + tema_mapa()
-ggsave(file.path(DIR_OUT, "gwrfr_exemplo_pesos.png"), p_pesos, width = 9, height = 8, dpi = 150)
-cat("✓ gwrfr_exemplo_pesos.png\n")
 
 # ---- objetos/resumo para o relatório -------------------------
 gwr_geoda <- list(

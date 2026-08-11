@@ -55,8 +55,8 @@ gl$b_litoral    <- sdf$litoral
 gl$r2_local     <- sdf$localR2
 gl$t_renda      <- sdf$renda   / sdf$renda_se
 gl$t_litoral    <- sdf$litoral / sdf$litoral_se
-gl$sig_renda    <- factor(abs(gl$t_renda)   > 1.96, c(TRUE, FALSE), c("Significativo", "Não significativo"))
-gl$sig_litoral  <- factor(abs(gl$t_litoral) > 1.96, c(TRUE, FALSE), c("Significativo", "Não significativo"))
+pct_sig_renda   <- mean(abs(gl$t_renda)   > 1.96) * 100
+pct_sig_litoral <- mean(abs(gl$t_litoral) > 1.96) * 100
 
 # ---- contrafactual: litoral = 0 ------------------------------
 gl$pred_gwr    <- sdf$pred
@@ -129,13 +129,14 @@ sv(ggplot(gl) + geom_sf(aes(fill = r2_local), colour = "white", linewidth = 0.06
         fill = "R² local", caption = FONTE_DADOS) + tema_mapa(),
    "gwr_lit_r2_local.png")
 
-sig_escala <- scale_fill_manual(values = c("Significativo" = "#08519c", "Não significativo" = "#e6e6e6"), drop = FALSE)
-sv(mapa_fill("sig_renda", "GWR: significância local da renda",
-   "Municípios onde o coeficiente da renda é significativo (|t| > 1,96)", "", sig_escala),
-   "gwr_lit_signif_renda.png")
-sv(mapa_fill("sig_litoral", "GWR: significância local da variável litorânea",
-   "Municípios onde o coeficiente litorâneo é significativo (|t| > 1,96)", "", sig_escala),
-   "gwr_lit_signif_litoral.png")
+sv(mapa_fill("t_renda", "GWR: estatística t local da renda",
+   sprintf("Magnitude e significância do efeito da renda (|t| > 1,96 em %.0f%% dos municípios)", pct_sig_renda),
+   "t", PAL_DIV()),
+   "gwr_lit_t_renda.png")
+sv(mapa_fill("t_litoral", "GWR: estatística t local da condição litorânea",
+   sprintf("Magnitude e significância do efeito litorâneo (|t| > 1,96 em %.0f%% dos municípios)", pct_sig_litoral),
+   "t", PAL_DIV()),
+   "gwr_lit_t_litoral.png")
 
 sv(mapa_fill("impacto_lit", "Contrafactual: impacto das cidades litorâneas",
    "Diferença entre a predição real e o cenário com litoral = 0 (furtos/1.000 hab.)",
@@ -146,15 +147,29 @@ sv(mapa_fill("dif_local_global", "GWR local menos predição global",
    "Onde o modelo local corrige o global (furtos/1.000 hab.)", "Local − global", PAL_DIV()),
    "gwr_local_vs_global.png")
 
+tema_g <- theme_light(base_size = 12) +
+  theme(legend.position = "top", panel.grid.minor = element_blank(),
+        plot.title = element_text(face = "bold"))
+
+# ---- extra: regime global x local do litoral -----------------
+p_reg <- ggplot(gl, aes(renda, tx_furto)) +
+  geom_point(aes(colour = grupo), size = 1.8, alpha = 0.7) +
+  geom_smooth(aes(colour = grupo), method = "lm", se = FALSE, linewidth = 1) +
+  geom_smooth(method = "lm", se = FALSE, colour = "grey30", linetype = "dashed",
+              linewidth = 0.8) +
+  scale_colour_manual(values = COR_GRUPO) +
+  labs(title = "Regime litorâneo x interior (perspectiva global x local)",
+       subtitle = "Reta tracejada = modelo global; retas coloridas = regimes separados",
+       x = "Renda média per capita (R$)", y = "Furtos por 1.000 hab.",
+       colour = NULL, caption = FONTE_DADOS) + tema_g
+ggsave(file.path(DIR_OUT, "litoral_regime_global_local.png"), p_reg, width = 9, height = 6, dpi = 150)
+cat("✓ litoral_regime_global_local.png\n")
+
+# ---- resíduos (por último): mapa, boxplot e dispersão ---------
 sv(mapa_fill("res_sem_lit", "Resíduos do modelo sem a variável litorânea",
    sprintf("Correlação resíduo × litoral = %.2f; Moran's I = %.2f", cor_sem, moran_sem),
    "Resíduo", PAL_DIV()),
    "residuos_mapa_sem_litoral.png")
-
-# ---- gráficos de resíduos ------------------------------------
-tema_g <- theme_light(base_size = 12) +
-  theme(legend.position = "top", panel.grid.minor = element_blank(),
-        plot.title = element_text(face = "bold"))
 
 res_long <- gl |> sf::st_drop_geometry() |>
   tidyr::pivot_longer(c(res_sem_lit, res_com_lit), names_to = "modelo", values_to = "residuo") |>
@@ -183,24 +198,11 @@ p_disp <- ggplot(gl, aes(renda, res_sem_lit, colour = grupo)) +
 ggsave(file.path(DIR_OUT, "residuos_dispersao_litoral.png"), p_disp, width = 9, height = 6, dpi = 150)
 cat("✓ residuos_dispersao_litoral.png\n")
 
-# ---- extra: regime global x local do litoral -----------------
-p_reg <- ggplot(gl, aes(renda, tx_furto)) +
-  geom_point(aes(colour = grupo), size = 1.8, alpha = 0.7) +
-  geom_smooth(aes(colour = grupo), method = "lm", se = FALSE, linewidth = 1) +
-  geom_smooth(method = "lm", se = FALSE, colour = "grey30", linetype = "dashed",
-              linewidth = 0.8) +
-  scale_colour_manual(values = COR_GRUPO) +
-  labs(title = "Regime litorâneo x interior (perspectiva global x local)",
-       subtitle = "Reta tracejada = modelo global; retas coloridas = regimes separados",
-       x = "Renda média per capita (R$)", y = "Furtos por 1.000 hab.",
-       colour = NULL, caption = FONTE_DADOS) + tema_g
-ggsave(file.path(DIR_OUT, "litoral_regime_global_local.png"), p_reg, width = 9, height = 6, dpi = 150)
-cat("✓ litoral_regime_global_local.png\n")
-
 # objetos para o relatório
 gwr_litoral <- list(
   bw_rl = bw_rl, gwr_rl = gwr_rl, comp = gwr_comp, res_grupo = res_por_grupo,
   cor_sem = cor_sem, cor_com = cor_com, moran_sem = moran_sem, moran_com = moran_com,
   m_litoral = m_litoral, m_interior = m_interior,
-  impacto_max = max(gl$impacto_lit), qr2_rl = qr2(gwr_rl), qr2_r = qr2(gwr_r)
+  impacto_max = max(gl$impacto_lit), qr2_rl = qr2(gwr_rl), qr2_r = qr2(gwr_r),
+  pct_sig_renda = pct_sig_renda, pct_sig_litoral = pct_sig_litoral
 )
