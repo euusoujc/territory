@@ -4,3 +4,6 @@ src/.RData
 src/.Rhistory
 docs/.~lock.*
 .DS_Store
+paper/*.aux
+paper/*.log
+paper/*.out
