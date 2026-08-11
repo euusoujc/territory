@@ -44,8 +44,12 @@ importado por `00_config.R`.
   `data/geoda_gwr_furto.gpkg` + `_shp/` — saída do GWR enxuto p/ mapear no GeoDa
 - `docs/guia_geoda.md`, `docs/guia_regressao_espacial.md`, `docs/guia_gwr_geoda.md`
   — roteiros passo a passo do GeoDa, com números de referência (R × GeoDa)
-- `docs/guia_apresentacao.md` — roteiro para apresentar `slides/`: o que
-  falar em cada slide e perguntas prováveis da banca
+- `docs/guia_projeto_completo.md` — base de conhecimento única com TODOS os
+  números do projeto (hipóteses, dados, metodologia completa, todos os
+  passos de resultado, limitações); referência para defesa oral
+- `docs/guia_apresentacao.md` — roteiro slide a slide de `slides/`, em duas
+  camadas (essencial + complemento), cada complemento apontando para a
+  seção correspondente em `guia_projeto_completo.md`
 - `outputs/` — relatório (relatorio.md), mapas, correlações, moran_global.csv,
   lisa_clusters.csv, resultados de regressão/GWR, analise_espacial.xlsx
   (tudo regenerado pelo pipeline)
