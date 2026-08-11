@@ -50,6 +50,9 @@ importado por `00_config.R`.
 - `docs/guia_apresentacao.md` — roteiro slide a slide de `slides/`, em duas
   camadas (essencial + complemento), cada complemento apontando para a
   seção correspondente em `guia_projeto_completo.md`
+- `docs/guia_conceitos_estatisticos.txt` — explica os MÉTODOS em si
+  (correlação, LISA, OLS, modelo múltiplo, spatial error/GWR): o que cada
+  termo significa e como ler cada número, não só o resultado final
 - `outputs/` — relatório (relatorio.md), mapas, correlações, moran_global.csv,
   lisa_clusters.csv, resultados de regressão/GWR, analise_espacial.xlsx
   (tudo regenerado pelo pipeline)
