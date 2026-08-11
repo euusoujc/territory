@@ -260,6 +260,16 @@ SLIDE 10 — "O espaço importa: do global ao local"
     entre todos os testados — confirma que ele é o melhor modelo mesmo
     descontando a complexidade extra.
 
+  >> NÃO ESTÁ NO SLIDE, mas é útil saber: o R²=0,458 da caixa "GWR
+     (renda)" é uma MÉDIA — na prática, esse R² varia por município (o
+     mesmo jeito que o "R² local" da tabela do slide 13 varia entre São
+     Paulo e Mongaguá). Nesse modelo só-renda, o R² local vai de 0,05 a
+     0,64 pelo estado: explica bem o furto no centro-oeste e mal
+     justamente no litoral e na Região Metropolitana — onde a hipótese do
+     turismo (H2) prevê que a renda NÃO deveria ser o fator dominante.
+     Reforça a mesma lógica do slide 13, um nível antes de chegar lá.
+     Mapa de referência: outputs/reg_esp_gwr_r2.png.
+
 ================================================================================
 SLIDE 12 — "Onde o modelo erra: o rastro da população flutuante"
 ================================================================================

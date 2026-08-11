@@ -185,7 +185,21 @@ ao "zerar" o litoral) e a tabela comparando os 6 modelos lado a lado (OLS,
 spatial error e GWR, com e sem litoral) foram cortados da apresentação
 final por tempo, mas estão completos no guia do projeto — vale ter esses
 números na cabeça caso perguntem "e se vocês tirassem o litoral do
-melhor modelo, o que mudaria concretamente?".
+modelo?" ou "qual o melhor modelo entre todos?".
+
+Também não aparece mais nenhum slide o **mapa de R² local do GWR só-renda**
+(`outputs/reg_esp_gwr_r2.png` — existia numa versão anterior da
+apresentação, não é corte de vocês). Ele mostra que o R²=0,458 da caixa do
+meio não é uniforme pelo estado: o R² local varia de **0,05 a 0,64**,
+explicando bem a taxa de furto no centro-oeste do estado e mal justamente
+no litoral e na Região Metropolitana — onde H2 prevê que o turismo deveria
+dominar o fenômeno em vez da renda. É uma resposta pronta caso perguntem
+"o R²=0,458 é igual em todo lugar?": não, e o padrão de onde ele é mais
+fraco é, ele mesmo, mais uma evidência a favor de H2.
+
+O coeficiente local da renda nesse mesmo modelo (só-renda) varia de
+−0,00216 a +0,00562 pelo estado — positivo na maior parte, invertido num
+bolsão do noroeste — e é significativo (|t|>1,96) em 72% dos municípios.
 
 ### Slide 12 — Onde o modelo erra: o rastro da população flutuante
 
