@@ -1,10 +1,11 @@
-# build_apresentacao.py — gera slides/apresentacao_final.pptx (13 slides,
-# ~10 min de fala). Ordem: motivação -> dados e variáveis -> por que o
-# furto (outliers por crime) -> correlação -> desenvolvimento do modelo
-# (autocorrelação, OLS, espacial global/GWR, contrafactual, mecanismo,
-# exemplo São Paulo x Mongaguá, comparação final) -> conclusão. Sem slide
-# de metodologia isolado (removido a pedido da orientação). Usa as figuras
-# já geradas em outputs/ pelo pipeline (Rscript run_espacial.R).
+# build_apresentacao.py — gera slides/apresentacao_final.pptx (15 slides,
+# ~10-12 min de fala). Ordem: hipótese -> dados e variáveis -> taxas (mapas
+# municipais + outliers por crime) -> correlação (e por que o furto) ->
+# desenvolvimento do modelo (autocorrelação, OLS, por que sair do OLS,
+# espacial global/GWR, contrafactual, mecanismo, exemplo São Paulo x
+# Mongaguá, comparação final) -> conclusão. Sem slide de metodologia
+# isolado (removido a pedido da orientação). Usa as figuras já geradas em
+# outputs/ pelo pipeline (Rscript run_espacial.R).
 #
 # Uso: python slides/build_apresentacao.py
 
@@ -232,34 +233,21 @@ textbox(s, Inches(0.9), Inches(5.25), Inches(11.5), Inches(0.5),
         "Orientação: Prof.ª Flávia da Fonseca Feitosa", size=15, color=GREY)
 
 # =====================================================================
-# 2. MOTIVAÇÃO
+# 2. HIPÓTESE
 # =====================================================================
 s = add_slide(); set_bg(s)
-kicker(s, "Hipótese e motivação")
-title(s, "Motivação: a pergunta que originou o trabalho")
+kicker(s, "Hipótese")
+title(s, "A pergunta que originou o trabalho")
 rule(s)
-textbox(s, Inches(0.6), Inches(1.75), Inches(6.7), Inches(0.9),
-        '"Acontecem mais crimes nas\ncidades mais pobres?"', size=24, bold=True,
-        color=RGBColor(0x1A, 0x1A, 0x1A))
-textbox(s, Inches(0.6), Inches(2.75), Inches(6.7), Inches(0.7),
+textbox(s, Inches(0.6), Inches(2.0), Inches(12.1), Inches(1.0),
+        '"Acontecem mais crimes nas cidades mais pobres?"', size=30, bold=True,
+        color=RGBColor(0x1A, 0x1A, 0x1A), align=PP_ALIGN.CENTER)
+textbox(s, Inches(1.8), Inches(3.0), Inches(9.7), Inches(0.6),
         "Hipótese inicial (H1): cidades mais pobres registram mais crimes patrimoniais.",
-        size=16, color=NAVY, bold=True)
-bullets(s, Inches(0.6), Inches(3.55), Inches(6.7), Inches(1.8), [
-    "Ocorrências criminais — SSP-SP, 2025 (roubo, furto e lesão corporal).",
-    "Renda média per capita — Censo IBGE 2022.",
-    "645 municípios — todo o estado de São Paulo.",
-], size=16, space_after=10)
-box = s.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(0.6), Inches(5.5), Inches(6.7), Inches(1.35))
-box.adjustments[0] = 0.08
-box.fill.solid(); box.fill.fore_color.rgb = RGBColor(0xFD, 0xEE, 0xE3); box.line.color.rgb = ORANGE; box.line.width = Pt(1)
-box.shadow.inherit = False
-tf = box.text_frame; tf.word_wrap = True; tf.margin_left = Inches(0.25); tf.margin_right = Inches(0.25)
-tf.vertical_anchor = MSO_ANCHOR.MIDDLE
-p = tf.paragraphs[0]; r = p.add_run()
-r.text = ("Observação inicial: a taxa de furto (por 1.000 hab.) mostra concentração "
-          "aparente na macrometrópole e no litoral — não no interior mais pobre.")
-r.font.size = Pt(15); r.font.color.rgb = RGBColor(0x66, 0x33, 0x00); r.font.name = "Calibri"
-picture_fit(s, img("mapa_taxa_furto.png"), Inches(7.7), Inches(1.75), Inches(4.9), Inches(5.1))
+        size=18, color=NAVY, bold=True, align=PP_ALIGN.CENTER)
+stat_pill(s, Inches(1.8), Inches(4.2), Inches(3.0), Inches(1.5), "645", "municípios de São Paulo")
+stat_pill(s, Inches(5.15), Inches(4.2), Inches(3.0), Inches(1.5), "3", "crimes analisados:\nroubo · furto · lesão corporal")
+stat_pill(s, Inches(8.5), Inches(4.2), Inches(3.0), Inches(1.5), "2", "fontes: SSP-SP (2025)\ne IBGE Censo 2022")
 footer(s, 2)
 
 # =====================================================================
@@ -287,28 +275,40 @@ bullets(s, Inches(0.6), Inches(5.7), Inches(12.1), Inches(1.2), [
 footer(s, 3)
 
 # =====================================================================
-# 4. POR QUE O FURTO — OUTLIERS POR CRIME
+# 4. TAXAS — MAPAS MUNICIPAIS
 # =====================================================================
 s = add_slide(); set_bg(s)
-kicker(s, "Dados e variáveis")
-title(s, "Por que o furto: cada crime tem seus outliers")
+kicker(s, "Taxas")
+title(s, "Como o crime se distribui no espaço")
 rule(s)
-picture_fit(s, crop_top("dispersoes_taxas_renda.png", 0.545), Inches(0.5), Inches(1.7), Inches(12.3), Inches(3.5))
-bullets(s, Inches(0.6), Inches(5.35), Inches(12.1), Inches(1.9), [
-    "Roubo: o outlier mais extremo é de um município não-litorâneo; os litorâneos "
-    "(laranja) aparecem elevados, mas não dominam o topo.",
-    "Furto: os outliers extremos são quase todos litorâneos — Mongaguá e outros "
-    "municípios da costa aparecem bem acima da nuvem geral de pontos.",
-    "Lesão corporal: o outlier extremo é de renda baixíssima e não-litorâneo; os "
-    "litorâneos ficam perdidos no meio da distribuição.",
-], size=14, space_after=8)
+picture_fit(s, img("mapa_taxa_roubo.png"), Inches(0.4), Inches(1.75), Inches(4.1), Inches(4.9))
+picture_fit(s, img("mapa_taxa_furto.png"), Inches(4.6), Inches(1.75), Inches(4.1), Inches(4.9))
+picture_fit(s, img("mapa_taxa_lesao.png"), Inches(8.8), Inches(1.75), Inches(4.1), Inches(4.9))
+textbox(s, Inches(0.6), Inches(6.75), Inches(12.1), Inches(0.4),
+        "Roubo concentra na macrometrópole; furto acompanha o litoral inteiro; lesão corporal é o menos estruturado no espaço.",
+        size=14, color=GREY, align=PP_ALIGN.CENTER)
 footer(s, 4)
 
 # =====================================================================
-# 5. CORRELAÇÃO
+# 5. TAXAS — OUTLIERS POR CRIME
 # =====================================================================
 s = add_slide(); set_bg(s)
-kicker(s, "Dados e variáveis")
+kicker(s, "Taxas")
+title(s, "Por que o furto: cada crime tem seus outliers")
+rule(s)
+picture_fit(s, crop_top("dispersoes_taxas_renda.png", 0.545), Inches(0.5), Inches(1.7), Inches(12.3), Inches(3.7))
+bullets(s, Inches(0.6), Inches(5.5), Inches(12.1), Inches(1.9), [
+    "Roubo: o outlier mais extremo é de um município não-litorâneo; os litorâneos (laranja) aparecem elevados, mas não dominam o topo.",
+    "Furto: os outliers extremos são quase todos litorâneos — Mongaguá e outros municípios da costa aparecem bem acima da nuvem geral de pontos.",
+    "Lesão corporal: o outlier extremo é de renda baixíssima e não-litorâneo; os litorâneos ficam perdidos no meio da distribuição.",
+], size=14, space_after=8)
+footer(s, 5)
+
+# =====================================================================
+# 6. CORRELAÇÃO E POR QUE O FURTO
+# =====================================================================
+s = add_slide(); set_bg(s)
+kicker(s, "Correlação")
 title(s, "A renda correlaciona positivamente com o furto")
 rule(s)
 crows = [
@@ -328,15 +328,16 @@ box.adjustments[0] = 0.08; box.fill.solid(); box.fill.fore_color.rgb = LIGHT_GRE
 tf = box.text_frame; tf.word_wrap = True; tf.margin_left = Inches(0.2); tf.margin_right = Inches(0.2)
 tf.vertical_anchor = MSO_ANCHOR.MIDDLE
 p = tf.paragraphs[0]; r = p.add_run()
-r.text = ("Correlação não implica causalidade — mas já contraria H1 para roubo e "
-          "furto, e os municípios litorâneos puxam boa parte desse padrão, motivando "
-          "a investigação espacial que segue.")
+r.text = ("Somando os mapas e os outliers do slide anterior a essa correlação: "
+          "o furto é o único crime em que renda, geografia e outliers litorâneos "
+          "apontam juntos na mesma direção — por isso ele foi escolhido como "
+          "variável dependente principal.")
 r.font.size = Pt(13); r.font.italic = True; r.font.color.rgb = GREY
 picture_fit(s, img("correlacao_matriz.png"), Inches(7.3), Inches(1.75), Inches(5.4), Inches(5.1))
-footer(s, 5)
+footer(s, 6)
 
 # =====================================================================
-# 6. AUTOCORRELAÇÃO ESPACIAL
+# 7. AUTOCORRELAÇÃO ESPACIAL
 # =====================================================================
 s = add_slide(); set_bg(s)
 kicker(s, "Desenvolvimento e resultados")
@@ -352,10 +353,10 @@ textbox(s, Inches(7.8), Inches(5.3), Inches(4.8), Inches(1.6),
         "acompanham o litoral (36% já são litorâneos/turísticos) — primeira pista "
         "quantitativa da H2.",
         size=13, color=GREY)
-footer(s, 6)
+footer(s, 7)
 
 # =====================================================================
-# 7. REGRESSÃO CLÁSSICA
+# 8. REGRESSÃO CLÁSSICA
 # =====================================================================
 s = add_slide(); set_bg(s)
 kicker(s, "Desenvolvimento e resultados")
@@ -372,62 +373,79 @@ textbox(s, Inches(7.9), Inches(5.0), Inches(4.7), Inches(1.9),
         "16 municípios do litoral. O padrão litorâneo não é efeito de poucos "
         "pontos: é estrutural.",
         size=13, color=GREY)
-footer(s, 7)
+footer(s, 8)
 
 # =====================================================================
-# 8. DO GLOBAL AO LOCAL (compacto: spatial error / GWR / GWR+litoral)
+# 9. POR QUE SAIR DO OLS (mapa de resíduos, em destaque)
+# =====================================================================
+s = add_slide(); set_bg(s)
+kicker(s, "Desenvolvimento e resultados")
+title(s, "Por que sair do OLS")
+rule(s)
+picture_fit(s, img("reg_esp_residuos_ols.png"), Inches(0.6), Inches(1.75), Inches(6.9), Inches(5.1))
+textbox(s, Inches(7.8), Inches(2.2), Inches(4.8), Inches(1.5),
+        "Moran's I = 0,38", size=34, bold=True, color=ORANGE)
+textbox(s, Inches(7.8), Inches(3.15), Inches(4.8), Inches(0.5),
+        "dos resíduos do modelo clássico (p < 0,001)", size=15, color=GREY)
+bullets(s, Inches(7.8), Inches(4.0), Inches(4.8), Inches(2.8), [
+    "Os resíduos do OLS ainda têm forte autocorrelação espacial: municípios "
+    "vizinhos erram parecido — o modelo está deixando estrutura espacial de fora.",
+    "Isso viola a premissa de independência do OLS e motiva os modelos espaciais "
+    "que seguem: spatial error e GWR.",
+], size=14, space_after=14)
+footer(s, 9)
+
+# =====================================================================
+# 10. DO GLOBAL AO LOCAL (compacto, com espaço)
 # =====================================================================
 s = add_slide(); set_bg(s)
 kicker(s, "Desenvolvimento e resultados")
 title(s, "O espaço importa: do global ao local")
 rule(s)
-textbox(s, Inches(0.6), Inches(1.75), Inches(12.1), Inches(0.6),
-        "Os resíduos do modelo clássico têm Moran's I = 0,38 (p<0,001): a "
-        "dependência espacial é ignorada pelo OLS. Como resolvemos isso?",
-        size=15, color=RGBColor(0x33, 0x33, 0x33))
+textbox(s, Inches(0.6), Inches(1.8), Inches(12.1), Inches(0.6),
+        "Três formas de tratar a estrutura espacial que o OLS deixou de fora:",
+        size=16, color=RGBColor(0x33, 0x33, 0x33))
 
 def box_model(slide, l, t, w, h, titulo, linhas, r2_val, destaque=False):
     box = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, l, t, w, h)
     box.fill.solid(); box.fill.fore_color.rgb = NAVY if destaque else WHITE
-    box.line.color.rgb = NAVY if not destaque else NAVY
+    box.line.color.rgb = NAVY
     box.line.width = Pt(1) if not destaque else Pt(0)
     box.shadow.inherit = False
-    top_bar = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, l, t, w, Pt(3))
+    top_bar = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, l, t, w, Pt(4))
     top_bar.fill.solid(); top_bar.fill.fore_color.rgb = ORANGE if not destaque else WHITE
     top_bar.line.fill.background(); top_bar.shadow.inherit = False
     tcol = WHITE if destaque else RGBColor(0x1A, 0x1A, 0x1A)
     lcol = RGBColor(0xDD, 0xE6, 0xF0) if destaque else GREY
-    textbox(slide, l + Inches(0.25), t + Inches(0.2), w - Inches(0.5), Inches(0.4),
-            titulo, size=15, bold=True, color=tcol)
-    textbox(slide, l + Inches(0.25), t + Inches(0.65), w - Inches(0.5), h - Inches(1.5),
-            "\n".join(linhas), size=12.5, color=lcol)
-    textbox(slide, l + Inches(0.25), t + h - Inches(0.75), w - Inches(0.5), Inches(0.6),
-            r2_val, size=22, bold=True, color=WHITE if destaque else ORANGE, align=PP_ALIGN.RIGHT)
+    textbox(slide, l + Inches(0.3), t + Inches(0.3), w - Inches(0.6), Inches(0.5),
+            titulo, size=19, bold=True, color=tcol)
+    textbox(slide, l + Inches(0.3), t + Inches(0.95), w - Inches(0.6), h - Inches(2.1),
+            "\n".join(linhas), size=15, color=lcol, line_spacing=1.3)
+    textbox(slide, l + Inches(0.3), t + h - Inches(1.0), w - Inches(0.6), Inches(0.8),
+            r2_val, size=30, bold=True, color=WHITE if destaque else ORANGE)
 
-box_model(s, Inches(0.6), Inches(2.55), Inches(3.9), Inches(2.0),
-          "1. Spatial Error (global)",
-          ["Testes de Lagrange apontam este", "modelo como mais adequado.",
-           "λ = 0,588 — resíduo cai a −0,03"],
+box_model(s, Inches(0.6), Inches(2.6), Inches(3.9), Inches(3.6),
+          "1. Spatial Error",
+          ["Global. Testes de Lagrange", "apontam este modelo como",
+           "mais adequado.", "λ = 0,588 · resíduo: 0,38 → −0,03"],
           "R² = 0,392")
-box_model(s, Inches(4.7), Inches(2.55), Inches(3.9), Inches(2.0),
+box_model(s, Inches(4.7), Inches(2.6), Inches(3.9), Inches(3.6),
           "2. GWR (renda)",
-          ["Banda adaptativa (~10 vizinhos).", "O coeficiente da renda passa a",
-           "variar livremente no espaço."],
+          ["Local. Banda adaptativa", "(~10 vizinhos) — o coeficiente",
+           "da renda passa a variar", "livremente no espaço."],
           "R² = 0,458")
-box_model(s, Inches(8.8), Inches(2.55), Inches(3.9), Inches(2.0),
+box_model(s, Inches(8.8), Inches(2.6), Inches(3.9), Inches(3.6),
           "3. GWR + litoral",
-          ["Banda adaptativa incorporando", "renda e a condição litorânea/", "turística, localmente."],
+          ["Local. Banda adaptativa", "incorporando renda e a",
+           "condição litorânea/turística,", "localmente."],
           "R² = 0,532", destaque=True)
-textbox(s, Inches(0.6), Inches(5.05), Inches(12.1), Inches(0.6),
+textbox(s, Inches(0.6), Inches(6.5), Inches(12.1), Inches(0.5),
         "Melhor ajuste entre todos os modelos testados — e o menor AIC (3027,4).",
-        size=19, bold=True, color=NAVY, align=PP_ALIGN.CENTER)
-picture_fit(s, img("reg_esp_residuos_ols.png"), Inches(4.7), Inches(5.85), Inches(3.9), Inches(1.15))
-textbox(s, Inches(4.7), Inches(5.72), Inches(3.9), Inches(0.25),
-        "resíduos do OLS: por que sair dele", size=10.5, italic=True, color=GREY, align=PP_ALIGN.CENTER)
-footer(s, 8)
+        size=17, bold=True, color=NAVY, align=PP_ALIGN.CENTER)
+footer(s, 10)
 
 # =====================================================================
-# 9. GWR + LITORAL — CONTRAFACTUAL
+# 11. GWR + LITORAL — CONTRAFACTUAL
 # =====================================================================
 s = add_slide(); set_bg(s)
 kicker(s, "Desenvolvimento e resultados")
@@ -453,10 +471,10 @@ r2.font.size = Pt(14); r2.font.bold = True; r2.font.color.rgb = ORANGE
 p3 = tf.add_paragraph(); r3 = p3.add_run()
 r3.text = "Com a variável incluída, ambos os grupos centram em zero."
 r3.font.size = Pt(13); r3.font.color.rgb = GREY
-footer(s, 9)
+footer(s, 11)
 
 # =====================================================================
-# 10. MECANISMO
+# 12. MECANISMO
 # =====================================================================
 s = add_slide(); set_bg(s)
 kicker(s, "Desenvolvimento e resultados")
@@ -480,10 +498,10 @@ tf.vertical_anchor = MSO_ANCHOR.MIDDLE
 p = tf.paragraphs[0]; r = p.add_run()
 r.text = "A taxa por 1.000 hab. superestima o risco real para quem mora lá — sem o dummy, o modelo sempre vai subestimar a taxa observada."
 r.font.size = Pt(13); r.font.color.rgb = RGBColor(0x66, 0x33, 0x00)
-footer(s, 10)
+footer(s, 12)
 
 # =====================================================================
-# 11. EXEMPLO: SÃO PAULO x MONGAGUÁ
+# 13. EXEMPLO: SÃO PAULO x MONGAGUÁ
 # =====================================================================
 s = add_slide(); set_bg(s)
 kicker(s, "Desenvolvimento e resultados")
@@ -510,10 +528,10 @@ bullets(s, Inches(7.5), Inches(2.0), Inches(5.2), Inches(4.2), [
     "Deixar a renda variar no espaço faz o R² saltar de 0,13 (global) para 0,46 "
     "(GWR local): não é só \"quanto\" de renda existe, é \"onde\" ela está.",
 ], size=14, space_after=14)
-footer(s, 11)
+footer(s, 13)
 
 # =====================================================================
-# 12. COMPARAÇÃO FINAL DOS MODELOS
+# 14. COMPARAÇÃO FINAL DOS MODELOS
 # =====================================================================
 s = add_slide(); set_bg(s)
 kicker(s, "Desenvolvimento e resultados")
@@ -548,10 +566,10 @@ textbox(s, Inches(1.9), Inches(4.9), Inches(9.5), Inches(1.4),
         "modelos espaciais (+0,052 no spatial error, +0,074 no GWR) — sinal de que "
         "eles já capturavam parte do padrão litorâneo implicitamente, pela geografia.",
         size=15, color=GREY, align=PP_ALIGN.CENTER)
-footer(s, 12)
+footer(s, 14)
 
 # =====================================================================
-# 13. CONCLUSÃO
+# 15. CONCLUSÃO
 # =====================================================================
 s = add_slide(); set_bg(s)
 band = s.shapes.add_shape(MSO_SHAPE.RECTANGLE, 0, Inches(7.32), SW, Inches(0.18))
@@ -585,7 +603,7 @@ for i, txt in enumerate(pontos):
     textbox(s, Inches(1.35), y - Inches(0.02), Inches(11.4), Inches(0.85), txt,
             size=14.5, color=RGBColor(0x1A, 0x1A, 0x1A) if not is_last else GREEN,
             bold=is_last)
-footer(s, 13)
+footer(s, 15)
 
 out_path = os.path.join(SLIDES_DIR, "apresentacao_final.pptx")
 prs.save(out_path)
